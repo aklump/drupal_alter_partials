@@ -1,0 +1,62 @@
+<?php
+/**
+ * @file
+ * Base file for the alter_partials_dev module.
+ *
+ * @defgroup alter_partials_dev Alter Partials Dev
+ * @{
+ */
+
+
+/**
+ * Implements hook_init().
+ */
+function alter_partials_dev_init() {
+  global $conf;
+  // Turn this off when the dev module is enabled.
+  $conf['alter_partials_cache_enabled'] = FALSE;
+}
+
+/**
+ * Implements hook_block_info().
+ */
+function alter_partials_dev_block_info() {
+  $blocks['suggestions'] = array(
+    'info' => t('Alter Partials suggestions'), 
+    'cache' => DRUPAL_CACHE_NO_CACHE
+  );
+  
+  return $blocks;
+}
+
+/**
+ * Implements hook_block_view().
+ */
+function alter_partials_dev_block_view($delta = '') {
+  $block = array();
+  switch ($delta) {
+    case 'suggestions':
+      $block['subject'] = t('Alter Partials filename suggestions');
+      // The content will be added via ajax on page load.
+      $block['content'] = array('#markup' => '<div></div>');
+      break;
+  }
+
+  return $block;
+}
+
+function alter_partials_dev_preprocess_html(&$build) {
+  global $_alter_partials_suggestions;
+  $inject_js['#attached']['js'][] =  array(
+    'type' => 'file', 
+    'data' => drupal_get_path('module', 'alter_partials_dev') . '/alter_partials_dev.js',
+    'scope' => 'footer',
+  );
+  $inject_js['#attached']['js'][] =  array(
+    'type' => 'setting', 
+    'data' => array('alterPartialsDev' => array(
+      'suggestions' => $_alter_partials_suggestions,
+    )),
+  );
+  drupal_render($inject_js);
+}

@@ -27,6 +27,11 @@ function alter_partials_alter_partials_info() {
  * @return string  The full system path to the include file.
  */
 function _alter_partials_get_partial($stack) {
+  global $_alter_partials_suggestions;
+  if (!is_array($_alter_partials_suggestions)) {
+    $_alter_partials_suggestions = array();
+  }
+
   static $drupal_static_fast;
   if (!isset($drupal_static_fast)) {
     $drupal_static_fast['index'] = &drupal_static(__FUNCTION__, NULL);
@@ -70,13 +75,21 @@ function _alter_partials_get_partial($stack) {
     }
   }
 
+  $return = NULL;
+  $list   = array_reverse($stack);
   while (($filename = array_pop($stack))) {
     if (isset($index[$filename])) {
-      return $index[$filename];
+      $return = $index[$filename];
+      break;
     }
   }
 
-  return NULL;
+  $_alter_partials_suggestions[] = array(
+    'list' => $list,
+    'active' => $return,
+  );
+
+  return $return;
 }
 
 /**
