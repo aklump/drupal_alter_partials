@@ -18,8 +18,6 @@
           items: settings.alterPartialsDev.suggestions[i].list
         });
         html.push(output);
-        var active = settings.alterPartialsDev.suggestions[i].active ? Drupal.t('Active file: ') + settings.alterPartialsDev.suggestions[i].active : Drupal.t('-- No active file --');
-        html.push(Drupal.theme('placeholder', active));
       }
       $target.html(html.join("\n"));
     }

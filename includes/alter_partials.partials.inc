@@ -24,9 +24,9 @@ function alter_partials_alter_partials_info() {
  *
  * @param  array $stack A list of paths to check for.
  *
- * @return string  The full system path to the include file.
+ * @return array The full system paths to the include files.
  */
-function _alter_partials_get_partial($stack) {
+function _alter_partials_get_partials($stack) {
   global $_alter_partials_suggestions;
   if (!is_array($_alter_partials_suggestions)) {
     $_alter_partials_suggestions = array();
@@ -76,17 +76,18 @@ function _alter_partials_get_partial($stack) {
   }
 
   $return = NULL;
-  $list   = array_reverse($stack);
-  while (($filename = array_pop($stack))) {
+  $stack  = array_reverse($stack);
+  $list = $stack;
+  foreach ($stack as $key => $filename) {
     if (isset($index[$filename])) {
-      $return = $index[$filename];
-      break;
+      $return[]   = $index[$filename];
+      $list[$key] = $index[$filename];
     }
   }
 
   $_alter_partials_suggestions[] = array(
+    'stack' => $stack,
     'list' => $list,
-    'active' => $return,
   );
 
   return $return;

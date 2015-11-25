@@ -23,7 +23,7 @@ function alter_partials_dev_init() {
 function alter_partials_dev_block_info() {
   $blocks['suggestions'] = array(
     'info' => t('Alter Partials suggestions'), 
-    'cache' => DRUPAL_CACHE_NO_CACHE
+    'cache' => DRUPAL_NO_CACHE
   );
   
   return $blocks;
