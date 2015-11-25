@@ -1,0 +1,16 @@
+name = "Alter Partials"
+description = "Provides file-based (partials) for hook_alters."
+package = Other
+version = 7.x-0.1
+core = 7.x
+php = 5.3
+configure = admin/config/system/alter-partials
+;project = alter_partials
+;project status url = http://code.intheloftstudios.com/release-history
+;homepage = http://www.intheloftstudios.com/packages/drupal/alter_partials
+author = aklump
+
+;files[] = tests/alter_partials.test
+;files[] = tests/alter_partials.phpunit.test
+
+;dependencies[] = variable

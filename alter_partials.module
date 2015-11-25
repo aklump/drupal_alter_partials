@@ -1,0 +1,50 @@
+<?php
+/**
+ * @file
+ * Base file for the alter_partials module.
+ *
+ * @defgroup alter_partials Alter Partials
+ * @{
+ */
+
+/**
+ * Implements hook_entity_view_alter().
+ */
+function alter_partials_entity_view_alter(&$build, $entity_type) {
+  module_load_include('inc', 'alter_partials', 'includes/alter_partials.partials');
+  $stack = _alter_partials_entity_stack($build);
+  if ($partial = _alter_partials_get_partial($stack)) {
+    
+    // Prepare vars for use by the file.
+    $vars = array();
+    _alter_partials_global_vars($vars, $build);
+    if (isset($build['#node'])) {
+      _alter_partials_node_vars($vars, $build['#node']);
+    }
+    extract($vars);
+    include $include;
+  }
+}
+
+/**
+ * Implements hook_ds_pre_render_alter().
+ */
+function alter_partials_ds_pre_render_alter(&$build, $context, $vars) {
+  module_load_include('inc', 'alter_partials', 'includes/alter_partials.partials');
+  list($id, $vid, $bundle) = entity_extract_ids($context['entity_type'], $context['entity']);
+  
+  $stack = _alter_partials_filename_stack($context['entity_type'], $bundle, $context['view_mode'], $id, 'ds');
+  $stack = _alter_partials_path_stack($stack);
+
+  if ($partial = _alter_partials_get_partial($stack)) {
+    
+    // Prepare vars for use by the file.
+    $vars = array();
+    _alter_partials_global_vars($vars, $build);
+    if ($context['entity_type'] === 'node') {
+      _alter_partials_node_vars($vars, $context['entity']);
+    }
+    extract($vars);
+    include $include;
+  }
+} 
