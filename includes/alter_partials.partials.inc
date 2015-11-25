@@ -7,6 +7,19 @@
  */
 
 /**
+ * Implements hook_alter_partials_info().
+ */
+function alter_partials_alter_partials_info() {
+  return array(
+    'directory' => array(
+      'theme' => array(
+        drupal_get_path('theme', variable_get('theme_default', '')) . '/alter_partials',
+      )
+    ),
+  );
+}
+
+/**
  * Returns the most-specific file from a path stack.
  *
  * @param  array $stack A list of paths to check for.
@@ -14,10 +27,52 @@
  * @return string  The full system path to the include file.
  */
 function _alter_partials_get_partial($stack) {
-  //@todo Figure out the fastest way to cache this to reduce file reads.
-  while (($include = array_pop($stack))) {
-    if (file_exists($include)) {
-      return $include;
+  static $drupal_static_fast;
+  if (!isset($drupal_static_fast)) {
+    $drupal_static_fast['index'] = &drupal_static(__FUNCTION__, NULL);
+  }
+  $index = &$drupal_static_fast['index'];
+  if (!isset($index)) {
+
+    $caching = variable_get('alter_partials_cache_enabled', ALTER_PARTIALS_CACHE_ENABLED);
+    if ($caching) {
+      if ($cache = cache_get('alter_partials:partials', 'cache')) {
+        $index = empty($cache->data) ? NULL : $cache->data;
+      }
+      else {
+        // Set the default values
+        $index = array();
+      }
+    }
+    if (empty($index)) {
+
+      // Search the filesystem for directories.
+      $info  = module_invoke_all('alter_partials_info');
+      $dirs  = $info['directory'];
+      $found = array();
+      foreach ($dirs['module'] as $path) {
+        $list = file_scan_directory($path, '/.*\.inc$/', array('recurse' => FALSE));
+        $found = array_merge($found, array_keys($list));
+      }
+      foreach ($dirs['theme'] as $path) {
+        $list = file_scan_directory($path, '/.*\.inc$/', array('recurse' => FALSE));
+        $found = array_merge($found, array_keys($list));
+      } 
+      
+      $index = array();
+      foreach ($found as $path) {
+        $index[pathinfo($path, PATHINFO_FILENAME)] = $path;
+      }
+    
+      if ($caching) {
+        cache_set('alter_partials:partials', $index, 'cache', CACHE_PERMANENT);
+      }
+    }
+  }
+
+  while (($filename = array_pop($stack))) {
+    if (isset($index[$filename])) {
+      return $index[$filename];
     }
   }
 
@@ -82,7 +137,7 @@ function _alter_partials_entity_stack($build) {
 
     if (!empty($id)) {
       $stack = _alter_partials_filename_stack($build['#entity_type'], $bundle, $view_mode, $id);
-      $stack = _alter_partials_path_stack($stack);
+      // $stack = _alter_partials_path_stack($stack);
     }
   }
   drupal_alter('alter_partials_entity_stack', $stack, $build);
@@ -122,13 +177,4 @@ function _alter_partials_filename_stack($entity_type, $type, $viewmode, $id, $pr
   }
 
   return $stack;
-}
-
-function _alter_partials_path_stack(Array $filename_stack) {
-  $base = rtrim(DRUPAL_ROOT, '/') . '/' . path_to_theme() . '/alter_partials/';
-  foreach ($filename_stack as &$file) {
-    $file = rtrim($base, '/') . "/{$file}.inc";
-  }
-
-  return $filename_stack;
 }

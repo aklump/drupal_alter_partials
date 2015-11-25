@@ -8,6 +8,13 @@
  */
 
 /**
+ * @var ALTER_PARTIALS_CACHE_ENABLED
+ *
+ * Default value for variable.
+ */
+define('ALTER_PARTIALS_CACHE_ENABLED', TRUE);
+
+/**
  * Implements hook_entity_view_alter().
  */
 function alter_partials_entity_view_alter(&$build, $entity_type) {
@@ -22,7 +29,7 @@ function alter_partials_entity_view_alter(&$build, $entity_type) {
       _alter_partials_node_vars($vars, $build['#node']);
     }
     extract($vars);
-    include $include;
+    include $partial;
   }
 }
 
@@ -34,7 +41,6 @@ function alter_partials_ds_pre_render_alter(&$build, $context, $vars) {
   list($id, $vid, $bundle) = entity_extract_ids($context['entity_type'], $context['entity']);
   
   $stack = _alter_partials_filename_stack($context['entity_type'], $bundle, $context['view_mode'], $id, 'ds');
-  $stack = _alter_partials_path_stack($stack);
 
   if ($partial = _alter_partials_get_partial($stack)) {
     
@@ -45,6 +51,6 @@ function alter_partials_ds_pre_render_alter(&$build, $context, $vars) {
       _alter_partials_node_vars($vars, $context['entity']);
     }
     extract($vars);
-    include $include;
+    include $partial;
   }
 } 

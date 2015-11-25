@@ -2,7 +2,7 @@
 **Author:** Aaron Klump  <sourcecode@intheloftstudios.com>
 
 ##Summary
-**Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nulla at massa sed nulla consectetur malesuada.**
+**Entity alters using partial files not functions.**
 
 This module allows you to use alter partials much the same way that you use tpl files in your theme.  All files should be placed in a subfolder of your theme called `alter_partials`.  The files will be searched from bottom to top and only the first file will be recognized (just like tpl files).
 
@@ -16,22 +16,23 @@ To alter display suite variables before a layout is rendered the files suggestio
     alter_partials/ds--node--17--narrow-page.inc
 
 
-##Requirements
-
 ##Installation
 1. Install as usual, see [http://drupal.org/node/70151](http://drupal.org/node/70151) for further information.
-1. You may need to modify the include path to loft_testing in `tests/phpunit/composer.json` depending upon where your module is installed relative loft testing.
-1. Visit testing/phpunit and do a `composer dumpautoload`.
+1. Create a folder in the default theme called `alter_partials` into which you create your partial files.
+1. Add one or more partial files using the idea above.  For an example look at `alter_partials/node--page--full.inc`.
 
 
-##Configuration
+## Advanced Configuration
+1. It is possible for modules to provide alter partials as well.  Refer to `alter_partials.api.php` for more info.
 
-##Suggested Use
+## Development
+During development you can disable the caching and thereby avoid having to drupal cache clear when adding new partials; you should not do this on production though.  To do so add the following line to your settings.php file:
+
+    $conf['alter_partials_cache_enabled'] = FALSE;
 
 ## Design Decisions/Rationale
+With the move toward smaller partials like in SASS I though it would be easier to manage code doing things this way rather than hundreds of lines of a function all wrapped in node_view_alter().
 
-## Testing
-Testing requires the following module: http://www.intheloftstudios.com/packages/drupal/loft_testing
 
 ##Contact
 * **In the Loft Studios**
