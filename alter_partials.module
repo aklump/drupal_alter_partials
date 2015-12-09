@@ -14,6 +14,86 @@
  */
 define('ALTER_PARTIALS_CACHE_ENABLED', TRUE);
 
+
+/**
+ * Provide a generic alter partials path for anything.
+ *
+ * This can be used for custom page callbacks.
+ *
+ * @param  array &$build The build array that will be sent to the partial.
+ * @param  array $vars Variables that will sent to the partial as their key name.
+ * @param string $type Usually the implementing module's name
+ * @param string $category The second item in the filename construct, optional but recommended.  It's one of many of $type.
+ * @param  string $version The optional third item in the filename construct. Should represent a version of category.
+ *
+ * @code
+ *   alter_partials_custom($build, $vars, 'my_module', 'page', 'about_us')  
+ * @endcode
+ *
+ * The above will look for files in this order by these names:
+ *   my-module--page--about-us.inc
+ *   my-module--about-us.inc
+ *   my-module--page.inc
+ *   my-module.inc
+ */
+function alter_partials_custom(&$build, $vars, $type, $category = '', $version = '') {
+  module_load_include('inc', 'alter_partials', 'includes/alter_partials.partials');
+  
+  $build = array();
+  $build['#alter_partials_type'] = $type;
+  $build['#alter_partials_category'] = $category;
+  $build['#alter_partials_version'] = $version;
+  $build['#alter_partials_vars'] = $vars;
+  $stack = _alter_partials_entity_stack($build);
+
+  if ($partials = _alter_partials_get_partials($stack)) {
+    foreach ($partials as $partial) {
+      $extract_vars = $vars;
+      _alter_partials_global_vars($extract_vars, $build);
+      extract($extract_vars);
+      include $partial;
+    }
+  }
+}
+
+/**
+ * Implements hook_views_prerender_().
+ */
+function alter_partials_preprocess_views_view(&$vars) {
+  module_load_include('inc', 'alter_partials', 'includes/alter_partials.partials');
+  
+  $view = $vars['view'];
+  $data = $view->result;
+  foreach ($data as &$result) {
+    $result = array(
+    ) + (array) $result;
+  }
+  $original = array(
+    '#alter_partials_type' => 'view',
+    '#alter_partials_category' => $view->name,
+    '#alter_partials_version' => $view->current_display,
+    // '#views_view_name'    => $view->name,
+    // '#views_view_display_id' => $view->current_display,
+    // '#views_view_data' => $data,
+    0 => array('#markup' => $vars['rows']),
+  );
+  $build = $original;
+
+  $stack = _alter_partials_entity_stack($build);
+  if ($partials = _alter_partials_get_partials($stack)) {
+    foreach ($partials as $partial) {
+      $extract_vars = array();
+      _alter_partials_global_vars($extract_vars, $build);
+      _alter_partials_view_vars($extract_vars, $view);
+      extract($extract_vars);
+      include $partial;
+    }
+  }
+  if ($build !== $original) {
+    $vars['rows'] = drupal_render($build);
+  }
+}
+
 /**
  * Implements hook_entity_view_alter().
  */
@@ -42,7 +122,6 @@ function alter_partials_ds_pre_render_alter(&$build, $context, &$vars) {
   list($id, $vid, $bundle) = entity_extract_ids($context['entity_type'], $context['entity']);
   
   $stack = _alter_partials_filename_stack($context['entity_type'], $bundle, $context['view_mode'], $id, 'ds');
-
   if ($partials = _alter_partials_get_partials($stack)) {
     foreach ($partials as $partial) {    
       // Prepare vars for use by the file.
@@ -55,4 +134,31 @@ function alter_partials_ds_pre_render_alter(&$build, $context, &$vars) {
       include $partial;
     }
   }
-} 
+}
+
+/**
+ * Implements hook_field_extra_fields().
+ *
+ * Creates an extra field that can be used in the manage display section
+ * to indicate to CM's that the display mode is not configured via the UI.
+ */
+function alter_partials_field_extra_fields() {
+  $info     = entity_get_info();
+  $entities = array();
+  foreach ($info as $entity_type => $i) {
+    $entities['#available'][$entity_type] = array_keys($i['bundles']);
+  }
+  drupal_alter('alter_partials_entities_in_code', $entities);
+  foreach (element_children($entities) as $entity_type) {
+    foreach ($entities[$entity_type] as $bundle_type) {
+      $extra[$entity_type][$bundle_type]['display'] = array(
+        'alter_partials_version_in_code' => array(
+          'label' => t('Display managed in code'),
+          'weight' => 0,
+        ),
+      );
+    }
+  }
+
+  return $extra;
+}

@@ -53,6 +53,7 @@ function _alter_partials_get_partials($stack) {
 
       // Search the filesystem for directories.
       $info  = module_invoke_all('alter_partials_info');
+      drupal_alter('alter_partials_info', $info, $stack);
       $dirs  = $info['directory'];
       $found = array();
       foreach ($dirs['module'] as $path) {
@@ -122,6 +123,20 @@ function _alter_partials_node_vars(&$vars, $node) {
 }
 
 /**
+ * Inserts view-based vars for the alter partial.
+ *
+ * @param  array &$vars
+ * @param  object $view
+ */
+function _alter_partials_view_vars(&$vars, $view) {
+  $vars = array(
+    'view' => $view,
+    'name' => $view->name,
+    'display_id' => $view->current_display,
+  ) + $vars;
+}
+
+/**
  * Return a stack of filepaths to check for alters for this build array.
  *
  * @param  array $build The render array
@@ -131,8 +146,11 @@ function _alter_partials_node_vars(&$vars, $node) {
  */
 function _alter_partials_entity_stack($build) {
   $stack = array();
+
+  $type = isset($build['#entity_type']) ? $build['#entity_type'] : NULL;
   
-  switch ($build['#entity_type']) {
+  $key = NULL;
+  switch ($type) {
     case 'taxonomy_term':
       $key = '#term';
       break;
@@ -142,8 +160,11 @@ function _alter_partials_entity_stack($build) {
     case 'user':
       $key = '#account';
       break;
+    case 'bean':
+      $key = '#entity';
+      break;
   }
-  $entity = isset($build[$key]) ? $build[$key] : NULL;
+  $entity = $key && isset($build[$key]) ? $build[$key] : NULL;
   
   if ($entity) {
     list($id, $vid, $bundle) = entity_extract_ids($build['#entity_type'], $entity);
@@ -154,6 +175,18 @@ function _alter_partials_entity_stack($build) {
       // $stack = _alter_partials_path_stack($stack);
     }
   }
+  elseif (isset($build['#alter_partials_type'])) {
+    $stack = array();
+    $stack[] = $build['#alter_partials_type'];
+    $stack[] = implode('--', array($build['#alter_partials_type'], $build['#alter_partials_category']));
+    $stack[] = implode('--', array($build['#alter_partials_type'], $build['#alter_partials_version']));
+    $stack[] = implode('--', array($build['#alter_partials_type'], $build['#alter_partials_category'], $build['#alter_partials_version']));
+  }
+
+  foreach ($stack as &$file) {
+    $file = str_replace('_', '-', $file);
+  }
+
   drupal_alter('alter_partials_entity_stack', $stack, $build);
 
   return $stack;
@@ -170,6 +203,16 @@ function _alter_partials_entity_stack($build) {
  */
 function _alter_partials_filename_stack($entity_type, $type, $viewmode, $id, $prefix = '') {
   $stack     = array();
+
+  // Least specific
+  $include   = $prefix ? array($prefix, $entity_type) : array($entity_type);
+
+  $stack[]   = implode('--', $include);
+
+  $include[] = $viewmode;
+  $stack[]   = implode('--', $include);
+
+  // Middle specific by bundle
   $include   = $prefix ? array($prefix, $entity_type) : array($entity_type);
 
   $include[] = $type;
@@ -178,17 +221,13 @@ function _alter_partials_filename_stack($entity_type, $type, $viewmode, $id, $pr
   $include[] = $viewmode;
   $stack[]   = implode('--', $include);
 
-  // Now start over with the nid.
+  // Most specific includes the id
   $include   = $prefix ? array($prefix, $entity_type, $id) : array($entity_type, $id);
 
   $stack[]   = implode('--', $include);
 
   $include[] = $viewmode;
   $stack[]   = implode('--', $include);
-
-  foreach ($stack as &$file) {
-    $file = str_replace('_', '-', $file);
-  }
 
   return $stack;
 }
