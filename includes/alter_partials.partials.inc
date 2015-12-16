@@ -102,11 +102,16 @@ function _alter_partials_get_partials($stack) {
  */
 function _alter_partials_global_vars(&$vars, $build) {
   $prop_keys = array_flip(element_properties($build));
-  $vars = array(
+  $global_vars = array(
     'build' => $build,
     'elements' => array_diff_key($build, $prop_keys),
     'properties' => array_intersect_key($build, $prop_keys),
-  ) + $vars;
+    'lang' => isset($build['#language']) ? $build['#language'] : language_default(),
+  );
+  if (isset($build['#entity']) && isset($build['#entity_type'])) {
+    $global_vars[$build['#entity_type']] = $build['#entity'];
+  }
+  $vars = $global_vars + $vars;
 }
 
 /**
