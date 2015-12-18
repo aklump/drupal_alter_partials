@@ -39,7 +39,6 @@ define('ALTER_PARTIALS_CACHE_ENABLED', TRUE);
 function alter_partials_custom(&$build, $vars, $type, $category = '', $version = '') {
   module_load_include('inc', 'alter_partials', 'includes/alter_partials.partials');
   
-  $build = array();
   $build['#alter_partials_type'] = $type;
   $build['#alter_partials_category'] = $category;
   $build['#alter_partials_version'] = $version;

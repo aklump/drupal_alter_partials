@@ -184,8 +184,10 @@ function _alter_partials_entity_stack($build) {
     $stack = array();
     $stack[] = $build['#alter_partials_type'];
     $stack[] = implode('--', array($build['#alter_partials_type'], $build['#alter_partials_category']));
-    $stack[] = implode('--', array($build['#alter_partials_type'], $build['#alter_partials_version']));
-    $stack[] = implode('--', array($build['#alter_partials_type'], $build['#alter_partials_category'], $build['#alter_partials_version']));
+    if ($build['#alter_partials_version']) {
+      $stack[] = implode('--', array($build['#alter_partials_type'], $build['#alter_partials_version']));
+      $stack[] = implode('--', array($build['#alter_partials_type'], $build['#alter_partials_category'], $build['#alter_partials_version']));
+    }
   }
 
   foreach ($stack as &$file) {
