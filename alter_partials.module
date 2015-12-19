@@ -97,7 +97,8 @@ function alter_partials_preprocess_views_view(&$vars) {
  * Implements hook_page_view_alter().
  */
 function alter_partials_page_alter(&$build) {
-
+  $stack = array();
+  
   // Check to see if we have a single node page.
   if (isset($build['content']['system_main']['nodes'])
     && count(element_children($build['content']['system_main']['nodes'])) === 1) {
