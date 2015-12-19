@@ -94,6 +94,34 @@ function alter_partials_preprocess_views_view(&$vars) {
 }
 
 /**
+ * Implements hook_page_view_alter().
+ */
+function alter_partials_page_alter(&$build) {
+
+  // Check to see if we have a single node page.
+  if (isset($build['content']['system_main']['nodes'])
+    && count(element_children($build['content']['system_main']['nodes'])) === 1) {
+    $element           = reset($build['content']['system_main']['nodes']);
+    $build['#node']      = $element['#node'];
+    $stack = _alter_partials_filename_stack('node', $element['#node']->type, $element['#view_mode'], $element['#node']->nid, 'page');
+  }
+  array_unshift($stack, 'page');
+
+  if ($partials = _alter_partials_get_partials($stack)) {
+    foreach ($partials as $partial) {
+      // Prepare vars for use by the file.
+      $extract_vars = array();
+      _alter_partials_global_vars($extract_vars, $build);
+      if (isset($build['#node'])) {
+        _alter_partials_node_vars($extract_vars, $build['#node']);
+      }
+      extract($extract_vars);
+      include $partial;
+    }
+  }
+}
+
+/**
  * Implements hook_entity_view_alter().
  */
 function alter_partials_entity_view_alter(&$build, $entity_type) {
