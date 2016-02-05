@@ -14,7 +14,7 @@ function alter_partials_alter_partials_info() {
     'directory' => array(
       'theme' => array(
         drupal_get_path('theme', variable_get('theme_default', '')) . '/alter_partials',
-      )
+      ),
     ),
   );
 }
@@ -52,9 +52,9 @@ function _alter_partials_get_partials($stack) {
     if (empty($index)) {
 
       // Search the filesystem for directories.
-      $info  = module_invoke_all('alter_partials_info');
+      $info = module_invoke_all('alter_partials_info');
       drupal_alter('alter_partials_info', $info, $stack);
-      $dirs  = $info['directory'];
+      $dirs = $info['directory'];
       $found = array();
       foreach ($dirs['module'] as $path) {
         $list = file_scan_directory($path, '/.*\.inc$/', array('recurse' => FALSE));
@@ -63,13 +63,13 @@ function _alter_partials_get_partials($stack) {
       foreach ($dirs['theme'] as $path) {
         $list = file_scan_directory($path, '/.*\.inc$/', array('recurse' => FALSE));
         $found = array_merge($found, array_keys($list));
-      } 
-      
+      }
+
       $index = array();
       foreach ($found as $path) {
         $index[pathinfo($path, PATHINFO_FILENAME)] = $path;
       }
-    
+
       if ($caching) {
         cache_set('alter_partials:partials', $index, 'cache', CACHE_PERMANENT);
       }
@@ -77,18 +77,18 @@ function _alter_partials_get_partials($stack) {
   }
 
   $return = NULL;
-  $stack  = array_reverse($stack);
+  $stack = array_reverse($stack);
   $list = $stack;
   foreach ($stack as $key => $filename) {
     if (isset($index[$filename])) {
-      $return[]   = $index[$filename];
+      $return[] = $index[$filename];
       $list[$key] = $index[$filename];
     }
   }
 
   $_alter_partials_suggestions[] = array(
     'stack' => $stack,
-    'list' => $list,
+    'list'  => $list,
   );
 
   return $return;
@@ -103,10 +103,10 @@ function _alter_partials_get_partials($stack) {
 function _alter_partials_global_vars(&$vars, $build) {
   $prop_keys = array_flip(element_properties($build));
   $global_vars = array(
-    'build' => $build,
-    'elements' => array_diff_key($build, $prop_keys),
+    'build'      => $build,
+    'elements'   => array_diff_key($build, $prop_keys),
     'properties' => array_intersect_key($build, $prop_keys),
-    'lang' => isset($build['#language']) ? $build['#language'] : language_default(),
+    'lang'       => isset($build['#language']) ? $build['#language'] : language_default(),
   );
   if (isset($build['#entity']) && isset($build['#entity_type'])) {
     $global_vars[$build['#entity_type']] = $build['#entity'];
@@ -117,35 +117,36 @@ function _alter_partials_global_vars(&$vars, $build) {
 /**
  * Inserts node-based vars for the alter partial.
  *
- * @param  array &$vars
+ * @param  array  &$vars
  * @param  object $node
  */
 function _alter_partials_node_vars(&$vars, $node) {
   $vars = array(
-    'node' => $node,
-    'lang' => ($l = $node->language) ? $l : language_default(),
-  ) + $vars;
+      'node' => $node,
+      'lang' => ($l = $node->language) ? $l : language_default(),
+    ) + $vars;
 }
 
 /**
  * Inserts view-based vars for the alter partial.
  *
- * @param  array &$vars
+ * @param  array  &$vars
  * @param  object $view
  */
 function _alter_partials_view_vars(&$vars, $view) {
   $vars = array(
-    'view' => $view,
-    'name' => $view->name,
-    'display_id' => $view->current_display,
-  ) + $vars;
+      'view'       => $view,
+      'name'       => $view->name,
+      'display_id' => $view->current_display,
+    ) + $vars;
 }
 
 /**
  * Return a stack of filepaths to check for alters for this build array.
  *
- * @param  array $build The render array
- * @param  string $type This may not be the bundle type in all cases, e.g. 'ds'.
+ * @param  array  $build The render array
+ * @param  string $type  This may not be the bundle type in all cases, e.g.
+ *                       'ds'.
  *
  * @return array  Files should be tested from the last to the first.
  */
@@ -153,7 +154,7 @@ function _alter_partials_entity_stack($build) {
   $stack = array();
 
   $type = isset($build['#entity_type']) ? $build['#entity_type'] : NULL;
-  
+
   $key = NULL;
   switch ($type) {
     case 'taxonomy_term':
@@ -170,10 +171,10 @@ function _alter_partials_entity_stack($build) {
       break;
   }
   $entity = $key && isset($build[$key]) ? $build[$key] : NULL;
-  
+
   if ($entity) {
     list($id, $vid, $bundle) = entity_extract_ids($build['#entity_type'], $entity);
-    $view_mode               = $build['#view_mode'];
+    $view_mode = $build['#view_mode'];
 
     if (!empty($id)) {
       $stack = _alter_partials_filename_stack($build['#entity_type'], $bundle, $view_mode, $id);
@@ -183,13 +184,24 @@ function _alter_partials_entity_stack($build) {
   elseif (isset($build['#alter_partials_type'])) {
     $stack = array();
     $stack[] = $build['#alter_partials_type'];
-    $stack[] = implode('--', array($build['#alter_partials_type'], $build['#alter_partials_category']));
+    $stack[] = implode('--', array(
+      $build['#alter_partials_type'],
+      $build['#alter_partials_category'],
+    ));
     if ($build['#alter_partials_version']) {
-      $stack[] = implode('--', array($build['#alter_partials_type'], $build['#alter_partials_version']));
-      $stack[] = implode('--', array($build['#alter_partials_type'], $build['#alter_partials_category'], $build['#alter_partials_version']));
+      $stack[] = implode('--', array(
+        $build['#alter_partials_type'],
+        $build['#alter_partials_version'],
+      ));
+      $stack[] = implode('--', array(
+        $build['#alter_partials_type'],
+        $build['#alter_partials_category'],
+        $build['#alter_partials_version'],
+      ));
     }
   }
 
+  $stack = array_unique($stack);
   foreach ($stack as &$file) {
     $file = str_replace('_', '-', $file);
   }
@@ -204,37 +216,58 @@ function _alter_partials_entity_stack($build) {
  *
  * @param  string $base E.g. entity type, ds, etc.
  * @param  string $type E.g. bundle name
- * @param  mixed $id E.g. entity id
+ * @param  mixed  $id   E.g. entity id
  *
  * @return array
  */
 function _alter_partials_filename_stack($entity_type, $type, $viewmode, $id, $prefix = '') {
-  $stack     = array();
+  $stack = array();
 
   // Least specific
-  $include   = $prefix ? array($prefix, $entity_type) : array($entity_type);
+  $include = $prefix ? array($prefix, $entity_type) : array($entity_type);
 
-  $stack[]   = implode('--', $include);
+  $stack[] = implode('--', $include);
 
   $include[] = $viewmode;
-  $stack[]   = implode('--', $include);
+  $stack[] = implode('--', $include);
+
+  if ($viewmode !== 'default') {
+    array_pop($include);
+    $include[] = 'default';
+    $stack[] = implode('--', $include);
+  }
 
   // Middle specific by bundle
-  $include   = $prefix ? array($prefix, $entity_type) : array($entity_type);
+  $include = $prefix ? array($prefix, $entity_type) : array($entity_type);
 
   $include[] = $type;
-  $stack[]   = implode('--', $include);
-  
+  $stack[] = implode('--', $include);
+
   $include[] = $viewmode;
-  $stack[]   = implode('--', $include);
+  $stack[] = implode('--', $include);
+
+  if ($viewmode !== 'default') {
+    array_pop($include);
+    $include[] = 'default';
+    $stack[] = implode('--', $include);
+  }
 
   // Most specific includes the id
-  $include   = $prefix ? array($prefix, $entity_type, $id) : array($entity_type, $id);
+  $include = $prefix ? array($prefix, $entity_type, $id) : array(
+    $entity_type,
+    $id,
+  );
 
-  $stack[]   = implode('--', $include);
+  $stack[] = implode('--', $include);
 
   $include[] = $viewmode;
-  $stack[]   = implode('--', $include);
+  $stack[] = implode('--', $include);
+
+  if ($viewmode !== 'default') {
+    array_pop($include);
+    $include[] = 'default';
+    $stack[] = implode('--', $include);
+  }
 
   return $stack;
 }

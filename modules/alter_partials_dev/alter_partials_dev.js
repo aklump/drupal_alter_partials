@@ -24,7 +24,6 @@
   };
 
   Drupal.theme.prototype.itemList = function(vars) {
-    console.log(vars);
     vars = $.extend({}, {
       type: 'ul',
       items: []
