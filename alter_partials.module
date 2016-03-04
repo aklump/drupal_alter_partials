@@ -97,6 +97,7 @@ function alter_partials_preprocess_views_view(&$vars) {
  * Implements hook_page_view_alter().
  */
 function alter_partials_page_alter(&$build) {
+  module_load_include('inc', 'alter_partials', 'includes/alter_partials.partials');
   $stack = array();
   
   // Check to see if we have a single node page.
