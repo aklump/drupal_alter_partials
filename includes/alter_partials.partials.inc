@@ -25,6 +25,8 @@ function alter_partials_alter_partials_info() {
  * @param  array $stack A list of paths to check for.
  *
  * @return array The full system paths to the include files.
+ *
+ * @throws InvalidArgumentException
  */
 function _alter_partials_get_partials($stack) {
   global $_alter_partials_suggestions;
@@ -50,19 +52,28 @@ function _alter_partials_get_partials($stack) {
       }
     }
     if (empty($index)) {
-
       // Search the filesystem for directories.
       $info = module_invoke_all('alter_partials_info');
       drupal_alter('alter_partials_info', $info, $stack);
       $dirs = $info['directory'];
       $found = array();
-      foreach ($dirs['module'] as $path) {
-        $list = file_scan_directory($path, '/.*\.inc$/', array('recurse' => FALSE));
-        $found = array_merge($found, array_keys($list));
+      if (isset($dirs['module'])) {
+        if (!is_array($dirs['module'])) {
+          throw new \InvalidArgumentException("module must be an array in implementation of hook_alter_partials_info");
+        }
+        foreach ($dirs['module'] as $path) {
+          $list = file_scan_directory($path, '/.*\.inc$/', array('recurse' => FALSE));
+          $found = array_merge($found, array_keys($list));
+        }
       }
-      foreach ($dirs['theme'] as $path) {
-        $list = file_scan_directory($path, '/.*\.inc$/', array('recurse' => FALSE));
-        $found = array_merge($found, array_keys($list));
+      if (isset($dirs['theme'])) {
+        if (!is_array($dirs['theme'])) {
+          throw new \InvalidArgumentException("theme must be an array in implementation of hook_alter_partials_info");
+        }
+        foreach ($dirs['theme'] as $path) {
+          $list = file_scan_directory($path, '/.*\.inc$/', array('recurse' => FALSE));
+          $found = array_merge($found, array_keys($list));
+        }
       }
 
       $index = array();
