@@ -53,6 +53,7 @@ function alter_partials_custom(&$build, $vars, $type, $category = '', $version =
       $extract_vars = $vars;
       _alter_partials_global_vars($extract_vars, $build);
       extract($extract_vars);
+      unset($extract_vars);
       include $partial;
     }
   }
@@ -87,6 +88,7 @@ function alter_partials_preprocess_views_view(&$vars) {
       _alter_partials_global_vars($extract_vars, $build);
       _alter_partials_view_vars($extract_vars, $view);
       extract($extract_vars);
+      unset($extract_vars);
       include $partial;
     }
   }
@@ -114,6 +116,7 @@ function alter_partials_page_alter(&$build) {
         _alter_partials_node_vars($extract_vars, $build['#node']);
       }
       extract($extract_vars);
+      unset($extract_vars);
       include $partial;
     }
   }
@@ -134,6 +137,7 @@ function alter_partials_entity_view_alter(&$build, $entity_type) {
         _alter_partials_node_vars($extract_vars, $build['#node']);
       }
       extract($extract_vars);
+      unset($extract_vars);
       include $partial;
     }
   }
@@ -156,6 +160,7 @@ function alter_partials_ds_pre_render_alter(&$build, $context, &$vars) {
         _alter_partials_node_vars($extract_vars, $context['entity']);
       }
       extract($extract_vars);
+      unset($extract_vars);
       include $partial;
     }
   }

@@ -79,3 +79,26 @@ function alter_partials_dev_preprocess_html(&$build) {
     drupal_render($inject_js);
   }
 }
+
+function alter_partials_dev_stub($path_to_output, array $vars) {
+  $filename = str_replace('--', ', ', pathinfo($vars['partial'], PATHINFO_FILENAME));
+  $list = array_reduce(array_filter(array_keys($vars), function ($var) {
+    return !in_array($var, ['partials']);
+  }), function ($carry, $var) {
+    return $carry . "\n *   - \$$var";
+  });
+  $stub = <<<EOD
+<?php
+/**
+ * @file Alter partial for {$filename}
+ *       
+ * Available variables:{$list} 
+ */
+\$build = \$properties;
+
+EOD;
+  if (file_exists($path_to_output)) {
+    file_put_contents($path_to_output, $stub);
+  }
+}
+
