@@ -99,7 +99,7 @@ function _alter_partials_get_partials($stack) {
 
   $_alter_partials_suggestions[] = array(
     'stack' => $stack,
-    'list'  => $list,
+    'list' => $list,
   );
 
   return $return;
@@ -114,13 +114,16 @@ function _alter_partials_get_partials($stack) {
 function _alter_partials_global_vars(&$vars, $build) {
   $prop_keys = array_flip(element_properties($build));
   $global_vars = array(
-    'build'      => $build,
-    'elements'   => array_diff_key($build, $prop_keys),
+    'build' => $build,
+    'elements' => array_diff_key($build, $prop_keys),
     'properties' => array_intersect_key($build, $prop_keys),
-    'lang'       => isset($build['#language']) ? $build['#language'] : language_default(),
+    'lang' => isset($build['#language']) ? $build['#language'] : language_default(),
   );
   if (isset($build['#entity']) && isset($build['#entity_type'])) {
     $global_vars[$build['#entity_type']] = $build['#entity'];
+  }
+  if (isset($build['#view_mode'])) {
+    $global_vars['view_mode'] = $build['#view_mode'];
   }
   $vars = $global_vars + $vars;
 }
@@ -146,8 +149,8 @@ function _alter_partials_node_vars(&$vars, $node) {
  */
 function _alter_partials_view_vars(&$vars, $view) {
   $vars = array(
-      'view'       => $view,
-      'name'       => $view->name,
+      'view' => $view,
+      'name' => $view->name,
       'display_id' => $view->current_display,
     ) + $vars;
 }
@@ -177,8 +180,10 @@ function _alter_partials_entity_stack($build) {
     case 'user':
       $key = '#account';
       break;
-    case 'bean':
-      $key = '#entity';
+    default:
+      if (isset($build['#entity'])) {
+        $key = '#entity';
+      }
       break;
   }
   $entity = $key && isset($build[$key]) ? $build[$key] : NULL;
@@ -192,9 +197,9 @@ function _alter_partials_entity_stack($build) {
       // $stack = _alter_partials_path_stack($stack);
     }
   }
-  elseif (isset($build['#alter_partials_type'])) {
+  else if (isset($build['#alter_partials_type'])) {
     $stack = array();
-    $stack[] = $build['#alter_partials_type'];
+    //    $stack[] = $build['#alter_partials_type'];
     $stack[] = implode('--', array(
       $build['#alter_partials_type'],
       $build['#alter_partials_category'],
@@ -222,6 +227,15 @@ function _alter_partials_entity_stack($build) {
   return $stack;
 }
 
+function _alter_partials_path_stack() {
+  $stack = array();
+  $include[] = 'page';
+  $include[] = str_replace('/', '-', current_path());
+  $stack[] = implode('--', $include);
+
+  return $stack;
+}
+
 /**
  * Generates a file stack for inclusions.
  *
@@ -237,7 +251,7 @@ function _alter_partials_filename_stack($entity_type, $type, $viewmode, $id, $pr
   // Least specific
   $include = $prefix ? array($prefix, $entity_type) : array($entity_type);
 
-  $stack[] = implode('--', $include);
+  //  $stack[] = implode('--', $include);
 
   $include[] = $viewmode;
   $stack[] = implode('--', $include);
@@ -252,7 +266,7 @@ function _alter_partials_filename_stack($entity_type, $type, $viewmode, $id, $pr
   $include = $prefix ? array($prefix, $entity_type) : array($entity_type);
 
   $include[] = $type;
-  $stack[] = implode('--', $include);
+  //  $stack[] = implode('--', $include);
 
   $include[] = $viewmode;
   $stack[] = implode('--', $include);
@@ -269,7 +283,7 @@ function _alter_partials_filename_stack($entity_type, $type, $viewmode, $id, $pr
     $id,
   );
 
-  $stack[] = implode('--', $include);
+  //  $stack[] = implode('--', $include);
 
   $include[] = $viewmode;
   $stack[] = implode('--', $include);

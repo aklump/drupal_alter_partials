@@ -22,22 +22,23 @@ function alter_partials_dev_init() {
  */
 function alter_partials_dev_permission() {
   return array(
-   'alter_partials_dev:access' => array(
-     'title' => t('Access Alter Partials Dev Info'),
-     'description' => t('Access developement info.'),
-     'restrict access' => FALSE,
-   ),
- );
+    'alter_partials_dev:access' => array(
+      'title' => t('Access Alter Partials Dev Info'),
+      'description' => t('Access developement info.'),
+      'restrict access' => FALSE,
+    ),
+  );
 }
+
 /**
  * Implements hook_block_info().
  */
 function alter_partials_dev_block_info() {
   $blocks['suggestions'] = array(
-    'info' => t('Alter Partials suggestions'), 
-    'cache' => DRUPAL_NO_CACHE
+    'info' => t('Alter Partials suggestions'),
+    'cache' => DRUPAL_NO_CACHE,
   );
-  
+
   return $blocks;
 }
 
@@ -62,16 +63,18 @@ function alter_partials_dev_block_view($delta = '') {
 function alter_partials_dev_preprocess_html(&$build) {
   global $_alter_partials_suggestions;
   if (user_access('alter_partials_dev:access')) {
-    $inject_js['#attached']['js'][] =  array(
-      'type' => 'file', 
+    $inject_js['#attached']['js'][] = array(
+      'type' => 'file',
       'data' => drupal_get_path('module', 'alter_partials_dev') . '/alter_partials_dev.js',
       'scope' => 'footer',
     );
-    $inject_js['#attached']['js'][] =  array(
-      'type' => 'setting', 
-      'data' => array('alterPartialsDev' => array(
-        'suggestions' => $_alter_partials_suggestions,
-      )),
+    $inject_js['#attached']['js'][] = array(
+      'type' => 'setting',
+      'data' => array(
+        'alterPartialsDev' => array(
+          'suggestions' => $_alter_partials_suggestions,
+        ),
+      ),
     );
     drupal_render($inject_js);
   }
