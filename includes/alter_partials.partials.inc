@@ -121,6 +121,9 @@ function _alter_partials_global_vars(&$vars, $build) {
   );
   if (isset($build['#entity']) && isset($build['#entity_type'])) {
     $global_vars[$build['#entity_type']] = $build['#entity'];
+    if (module_exists('data_api')) {
+      $global_vars['e'] = data_api($build['#entity_type']);
+    }
   }
   if (isset($build['#view_mode'])) {
     $global_vars['view_mode'] = $build['#view_mode'];
