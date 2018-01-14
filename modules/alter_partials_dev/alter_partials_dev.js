@@ -13,17 +13,20 @@
     if (typeof settings.alterPartialsDev.suggestions !== 'undefined' && $target.length) {
       var html = [];
       for (var i in settings.alterPartialsDev.suggestions) {
-        var output = Drupal.theme('itemList', {
-          type: 'ol',
-          items: settings.alterPartialsDev.suggestions[i].list
-        });
+        var items  = settings.alterPartialsDev.suggestions[i].list.map(function (item) {
+              return item + '.inc';
+            }),
+            output = Drupal.theme('itemList', {
+              type: 'ol',
+              items: items
+            });
         html.push(output);
       }
       $target.html(html.join("\n"));
     }
   };
 
-  Drupal.theme.prototype.itemList = function(vars) {
+  Drupal.theme.prototype.itemList = function (vars) {
     vars = $.extend({}, {
       type: 'ul',
       items: []
