@@ -1,0 +1,18 @@
+
+<ol>
+<li>Create the folder <em>alter_partials</em> in your theme.</li>
+<li>Enable <em>alter_partials_dev</em> and assign the block <em>Alter Partials suggestions</em> to a visible region in your active theme.</li>
+<li>By enabling <em>alter_partials_dev</em> the caching of partials is disabled and you have access to a suggestion list of filenames, so this is helpful during development.</li>
+<li><strong><em>alter_partials_dev</em> MUST NOT BE ENABLED ON A PRODUCTION SITE.</strong></li>
+<li>Visit the page you want to alter and find the filename suggestion that applies.</li>
+<li>Create that file inside <em>alter_partials</em>.</li>
+<li><p>To see the variable names available in your partial use this snippet:</p>
+
+<pre><code>&lt;?php
+print '&lt;pre&gt;';
+print __FUNCTION__ . '(): ';
+print_r(array_keys(get_defined_vars()));
+print '&lt;/pre&gt;';
+die;
+</code></pre></li>
+</ol>
