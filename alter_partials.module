@@ -74,9 +74,6 @@ function alter_partials_preprocess_views_view(&$vars) {
     '#alter_partials_type' => 'view',
     '#alter_partials_category' => $view->name,
     '#alter_partials_version' => $view->current_display,
-    // '#views_view_name'    => $view->name,
-    // '#views_view_display_id' => $view->current_display,
-    // '#views_view_data' => $data,
     0 => array('#markup' => $vars['rows']),
   );
   $build = $original;
@@ -178,7 +175,23 @@ function alter_partials_field_extra_fields() {
   foreach ($info as $entity_type => $i) {
     $entities['#available'][$entity_type] = array_keys($i['bundles']);
   }
+
+  // Autodiscover based on discovered partials files.
+  module_load_include('inc', 'alter_partials', 'includes/alter_partials.partials');
+  $discovered = array();
+  _alter_partials_get_partials([], $discovered);
+  foreach (array_keys($discovered) as $name) {
+    list($entity, $type) = explode('--', $name . '--');
+    $entity = str_replace('-', '_', $entity);
+    $type = str_replace('-', '_', $type);
+    $entities[$entity][$type] = $type;
+  }
+
+  foreach (element_children($entities) as $entity_type) {
+    $entities[$entity_type] = array_keys($entities[$entity_type]);
+  }
   drupal_alter('alter_partials_entities_in_code', $entities);
+
   foreach (element_children($entities) as $entity_type) {
     foreach ($entities[$entity_type] as $bundle_type) {
       $extra[$entity_type][$bundle_type]['display'] = array(

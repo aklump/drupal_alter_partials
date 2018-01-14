@@ -22,13 +22,14 @@ function alter_partials_alter_partials_info() {
 /**
  * Returns the most-specific file from a path stack.
  *
- * @param  array $stack A list of paths to check for.
+ * @param  array $stack       A list of paths to check for.
+ * @param array  &$discovered Pass an empty array to be filled by all discovered partials.
  *
  * @return array The full system paths to the include files.
  *
  * @throws InvalidArgumentException
  */
-function _alter_partials_get_partials($stack) {
+function _alter_partials_get_partials($stack, &$discovered = NULL) {
   global $_alter_partials_suggestions;
   if (!is_array($_alter_partials_suggestions)) {
     $_alter_partials_suggestions = array();
@@ -87,6 +88,7 @@ function _alter_partials_get_partials($stack) {
     }
   }
 
+  $discovered = $index;
   $return = NULL;
   $stack = array_reverse($stack);
   $list = $stack;
@@ -197,7 +199,6 @@ function _alter_partials_entity_stack($build) {
 
     if (!empty($id)) {
       $stack = _alter_partials_filename_stack($build['#entity_type'], $bundle, $view_mode, $id);
-      // $stack = _alter_partials_path_stack($stack);
     }
   }
   else if (isset($build['#alter_partials_type'])) {

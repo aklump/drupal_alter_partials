@@ -33,6 +33,7 @@ For performance reasons, you must include the view mode.
 ## View modes field
 
 An extra field is provided to serve as a UI indicator that the view mode is not being configured via the UI, but instead via code.  It reads _Display managed in code_.  The intention is that for a given display mode, you can show only this field and it will be a clear sign to the content managers why they cannot configure the view mode using normal field means.  For more info see `hook_alter_partials_entities_in_code_alter()`.
+* When you create a partial file, it should automatically cause this new view mode field to appear; if it doesn't look into `hook_alter_partials_entities_in_code_alter()`
 
 ## Advanced Configuration
 

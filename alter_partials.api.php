@@ -41,11 +41,13 @@ function hook_alter_partials_info() {
 /**
  * Implements hook_alter_partials_entities_in_code_alter().
  *
+ * $info['#available'] has all the possible options, so you may just want to filter on that array.
+ *
  * Info has a key: #enabled.  Any entity/bundles placed in
  * the #enabled array will receive this extra field.  The array contains
  * all possibilies as reference.
  */
 function hook_alter_partials_entities_in_code_alter(&$info) {
-  // Enable layout_region bundle on bean entity to have extra field.
-  $info['bean'] = array('layout_region');
+  $info['bean'] = $info['#available']['bean'];
+  $info['node'] = $info['#available']['node'];
 }
