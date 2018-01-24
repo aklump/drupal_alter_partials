@@ -24,13 +24,12 @@ For performance reasons, you must include the view mode.
 ## Installation
 
 1. Install as usual, see [http://drupal.org/node/70151](http://drupal.org/node/70151) for further information.
-1. Create a folder in the default theme called `alter_partials` into which you create your partial files.
-1. Add one or more partial files using the idea above.  For an example look at `alter_partials/node--page--full.inc`.
-1. Using the optional develop module, you can place a helper block called "Alter Partials suggestions" during development to help you know what files to use on a page.
+2. Enable advanced help for more information and examples.
 
 ## View modes field
 
 An extra field is provided to serve as a UI indicator that the view mode is not being configured via the UI, but instead via code.  It reads _Display managed in code_.  The intention is that for a given display mode, you can show only this field and it will be a clear sign to the content managers why they cannot configure the view mode using normal field means.  For more info see `hook_alter_partials_entities_in_code_alter()`.
+* When you create a partial file, it should automatically cause this new view mode field to appear; if it doesn't look into `hook_alter_partials_entities_in_code_alter()`
 
 ## Advanced Configuration
 

@@ -31,13 +31,7 @@ Installation
 
     1. Install as usual, see [2]http://drupal.org/node/70151 for further
        information.
-    2. Create a folder in the default theme called alter_partials into
-       which you create your partial files.
-    3. Add one or more partial files using the idea above. For an example
-       look at alter_partials/node--page--full.inc.
-    4. Using the optional develop module, you can place a helper block
-       called "Alter Partials suggestions" during development to help you
-       know what files to use on a page.
+    2. Enable advanced help for more information and examples.
 
 View modes field
 
@@ -47,7 +41,10 @@ View modes field
    mode, you can show only this field and it will be a clear sign to the
    content managers why they cannot configure the view mode using normal
    field means. For more info see
-   hook_alter_partials_entities_in_code_alter().
+   hook_alter_partials_entities_in_code_alter(). * When you create a
+   partial file, it should automatically cause this new view mode field to
+   appear; if it doesn't look into
+   hook_alter_partials_entities_in_code_alter()
 
 Advanced Configuration
 

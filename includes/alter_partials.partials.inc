@@ -116,13 +116,16 @@ function _alter_partials_get_partials($stack, &$discovered = NULL) {
 function _alter_partials_global_vars(&$vars, $build) {
   $prop_keys = array_flip(element_properties($build));
   $global_vars = array(
+    'original' => $build,
     'build' => $build,
     'elements' => array_diff_key($build, $prop_keys),
     'properties' => array_intersect_key($build, $prop_keys),
     'lang' => isset($build['#language']) ? $build['#language'] : language_default(),
   );
   if (isset($build['#entity']) && isset($build['#entity_type'])) {
+    $global_vars['entity_type_id'] = $build['#entity_type'];
     $global_vars[$build['#entity_type']] = $build['#entity'];
+    $global_vars['entity'] = $build['#entity'];
     if (module_exists('data_api')) {
       $global_vars['e'] = data_api($build['#entity_type']);
     }
@@ -142,6 +145,7 @@ function _alter_partials_global_vars(&$vars, $build) {
 function _alter_partials_node_vars(&$vars, $node) {
   $vars = array(
       'node' => $node,
+      'entity' => $node,
       'lang' => ($l = $node->language) ? $l : language_default(),
     ) + $vars;
 }

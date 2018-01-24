@@ -82,10 +82,13 @@ function alter_partials_dev_preprocess_html(&$build) {
 
 function alter_partials_dev_stub($path_to_output, array $vars) {
   $filename = str_replace('--', ', ', pathinfo($vars['partial'], PATHINFO_FILENAME));
-  $list = array_reduce(array_filter(array_keys($vars), function ($var) {
+  $vars = array_keys($vars);
+  sort($vars);
+  $list = array_reduce(array_filter($vars, function ($var) {
     return !in_array($var, ['partials']);
   }), function ($carry, $var) {
-    return $carry . "\n *   - \$$var";
+    $type = gettype($var);
+    return $carry . "\n *   - \$$var $type";
   });
   $stub = <<<EOD
 <?php
@@ -94,11 +97,10 @@ function alter_partials_dev_stub($path_to_output, array $vars) {
  *       
  * Available variables:{$list} 
  */
-\$build = \$properties;
 
 EOD;
-  if (file_exists($path_to_output)) {
-    file_put_contents($path_to_output, $stub);
-  }
+  drupal_alter('alter_partials_dev_stub', $stub, $path_to_output);
+  $stub .= PHP_EOL. PHP_EOL . PHP_EOL . file_get_contents($path_to_output);
+  file_put_contents($path_to_output, $stub);
 }
 

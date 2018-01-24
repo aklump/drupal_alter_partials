@@ -2,17 +2,16 @@
 <ol>
 <li>Create the folder <em>alter_partials</em> in your theme.</li>
 <li>Enable <em>alter_partials_dev</em> and assign the block <em>Alter Partials suggestions</em> to a visible region in your active theme.</li>
-<li>By enabling <em>alter_partials_dev</em> the caching of partials is disabled and you have access to a suggestion list of filenames, so this is helpful during development.</li>
+<li>By enabling <em>alter_partials_dev</em> the caching of partials is disabled, you have access to a suggestion list of filenames as a block, and a partial stub writer is available, so this is very helpful during development.</li>
 <li><strong><em>alter_partials_dev</em> MUST NOT BE ENABLED ON A PRODUCTION SITE.</strong></li>
 <li>Visit the page you want to alter and find the filename suggestion that applies.</li>
 <li>Create that file inside <em>alter_partials</em>.</li>
-<li><p>To see the variable names available in your partial use this snippet:</p>
+<li><p>Set the contents of the file to the following, and make sure the file is writeable by PHP.</p>
 
 <pre><code>&lt;?php
-print '&lt;pre&gt;';
-print __FUNCTION__ . '(): ';
-print_r(array_keys(get_defined_vars()));
-print '&lt;/pre&gt;';
-die;
+alter_partials_dev_stub(__FILE__, get_defined_vars());
 </code></pre></li>
+<li><p>Visit the page and the file will be rewritten with a stub; reload the file to see the new contents.</p></li>
+<li>The render array is called <code>$build</code>, which controls the output.</li>
+<li>You now have an alter partial file; modify <code>$build</code> as desired.</li>
 </ol>
