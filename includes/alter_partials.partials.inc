@@ -10,20 +10,21 @@
  * Implements hook_alter_partials_info().
  */
 function alter_partials_alter_partials_info() {
-  return array(
-    'directory' => array(
-      'theme' => array(
+  return [
+    'directory' => [
+      'theme' => [
         drupal_get_path('theme', variable_get('theme_default', '')) . '/alter_partials',
-      ),
-    ),
-  );
+      ],
+    ],
+  ];
 }
 
 /**
  * Returns the most-specific file from a path stack.
  *
- * @param  array $stack       A list of paths to check for.
- * @param array  &$discovered Pass an empty array to be filled by all discovered partials.
+ * @param  array $stack A list of paths to check for.
+ * @param array &$discovered Pass an empty array to be filled by all discovered
+ *   partials.
  *
  * @return array The full system paths to the include files.
  *
@@ -32,7 +33,7 @@ function alter_partials_alter_partials_info() {
 function _alter_partials_get_partials($stack, &$discovered = NULL) {
   global $_alter_partials_suggestions;
   if (!is_array($_alter_partials_suggestions)) {
-    $_alter_partials_suggestions = array();
+    $_alter_partials_suggestions = [];
   }
 
   static $drupal_static_fast;
@@ -49,7 +50,7 @@ function _alter_partials_get_partials($stack, &$discovered = NULL) {
       }
       else {
         // Set the default values
-        $index = array();
+        $index = [];
       }
     }
     if (empty($index)) {
@@ -57,13 +58,13 @@ function _alter_partials_get_partials($stack, &$discovered = NULL) {
       $info = module_invoke_all('alter_partials_info');
       drupal_alter('alter_partials_info', $info, $stack);
       $dirs = $info['directory'];
-      $found = array();
+      $found = [];
       if (isset($dirs['module'])) {
         if (!is_array($dirs['module'])) {
           throw new \InvalidArgumentException("module must be an array in implementation of hook_alter_partials_info");
         }
         foreach ($dirs['module'] as $path) {
-          $list = file_scan_directory($path, '/.*\.inc$/', array('recurse' => FALSE));
+          $list = file_scan_directory($path, '/.*\.inc$/', ['recurse' => FALSE]);
           $found = array_merge($found, array_keys($list));
         }
       }
@@ -72,12 +73,12 @@ function _alter_partials_get_partials($stack, &$discovered = NULL) {
           throw new \InvalidArgumentException("theme must be an array in implementation of hook_alter_partials_info");
         }
         foreach ($dirs['theme'] as $path) {
-          $list = file_scan_directory($path, '/.*\.inc$/', array('recurse' => FALSE));
+          $list = file_scan_directory($path, '/.*\.inc$/', ['recurse' => FALSE]);
           $found = array_merge($found, array_keys($list));
         }
       }
 
-      $index = array();
+      $index = [];
       foreach ($found as $path) {
         $index[pathinfo($path, PATHINFO_FILENAME)] = $path;
       }
@@ -99,10 +100,10 @@ function _alter_partials_get_partials($stack, &$discovered = NULL) {
     }
   }
 
-  $_alter_partials_suggestions[] = array(
+  $_alter_partials_suggestions[] = [
     'stack' => $stack,
     'list' => $list,
-  );
+  ];
 
   return $return;
 }
@@ -115,17 +116,18 @@ function _alter_partials_get_partials($stack, &$discovered = NULL) {
  */
 function _alter_partials_global_vars(&$vars, $build) {
   $prop_keys = array_flip(element_properties($build));
-  $global_vars = array(
+  $global_vars = [
     'original' => $build,
     'build' => $build,
     'elements' => array_diff_key($build, $prop_keys),
     'properties' => array_intersect_key($build, $prop_keys),
     'lang' => isset($build['#language']) ? $build['#language'] : language_default(),
-  );
+  ];
   if (isset($build['#entity']) && isset($build['#entity_type'])) {
     $global_vars['entity_type_id'] = $build['#entity_type'];
     $global_vars[$build['#entity_type']] = $build['#entity'];
     $global_vars['entity'] = $build['#entity'];
+
     // Get the entity id.
     if (method_exists($build['#entity'], 'identifier')) {
       $global_vars['entity_id'] = $build['#entity']->identifier();
@@ -149,42 +151,42 @@ function _alter_partials_global_vars(&$vars, $build) {
 /**
  * Inserts node-based vars for the alter partial.
  *
- * @param  array  &$vars
+ * @param  array &$vars
  * @param  object $node
  */
 function _alter_partials_node_vars(&$vars, $node) {
-  $vars = array(
+  $vars = [
       'node' => $node,
       'entity' => $node,
       'lang' => ($l = $node->language) ? $l : language_default(),
-    ) + $vars;
+    ] + $vars;
 }
 
 /**
  * Inserts view-based vars for the alter partial.
  *
- * @param  array  &$vars
+ * @param  array &$vars
  * @param  object $view
  */
 function _alter_partials_view_vars(&$vars, $view) {
-  $vars = array(
+  $vars = [
       'view' => $view,
       'name' => $view->name,
       'display_id' => $view->current_display,
-    ) + $vars;
+    ] + $vars;
 }
 
 /**
  * Return a stack of filepaths to check for alters for this build array.
  *
- * @param  array  $build The render array
- * @param  string $type  This may not be the bundle type in all cases, e.g.
+ * @param  array $build The render array
+ * @param  string $type This may not be the bundle type in all cases, e.g.
  *                       'ds'.
  *
  * @return array  Files should be tested from the last to the first.
  */
 function _alter_partials_entity_stack($build) {
-  $stack = array();
+  $stack = [];
 
   $type = isset($build['#entity_type']) ? $build['#entity_type'] : NULL;
 
@@ -215,23 +217,23 @@ function _alter_partials_entity_stack($build) {
       $stack = _alter_partials_filename_stack($build['#entity_type'], $bundle, $view_mode, $id);
     }
   }
-  else if (isset($build['#alter_partials_type'])) {
-    $stack = array();
+  elseif (isset($build['#alter_partials_type'])) {
+    $stack = [];
     //    $stack[] = $build['#alter_partials_type'];
-    $stack[] = implode('--', array(
+    $stack[] = implode('--', [
       $build['#alter_partials_type'],
       $build['#alter_partials_category'],
-    ));
+    ]);
     if ($build['#alter_partials_version']) {
-      $stack[] = implode('--', array(
+      $stack[] = implode('--', [
         $build['#alter_partials_type'],
         $build['#alter_partials_version'],
-      ));
-      $stack[] = implode('--', array(
+      ]);
+      $stack[] = implode('--', [
         $build['#alter_partials_type'],
         $build['#alter_partials_category'],
         $build['#alter_partials_version'],
-      ));
+      ]);
     }
   }
 
@@ -246,7 +248,7 @@ function _alter_partials_entity_stack($build) {
 }
 
 function _alter_partials_path_stack() {
-  $stack = array();
+  $stack = [];
   $include[] = 'page';
   $include[] = str_replace('/', '-', current_path());
   $stack[] = implode('--', $include);
@@ -259,15 +261,15 @@ function _alter_partials_path_stack() {
  *
  * @param  string $base E.g. entity type, ds, etc.
  * @param  string $type E.g. bundle name
- * @param  mixed  $id   E.g. entity id
+ * @param  mixed $id E.g. entity id
  *
  * @return array
  */
 function _alter_partials_filename_stack($entity_type, $type, $viewmode, $id, $prefix = '') {
-  $stack = array();
+  $stack = [];
 
   // Least specific
-  $include = $prefix ? array($prefix, $entity_type) : array($entity_type);
+  $include = $prefix ? [$prefix, $entity_type] : [$entity_type];
 
   //  $stack[] = implode('--', $include);
 
@@ -281,7 +283,7 @@ function _alter_partials_filename_stack($entity_type, $type, $viewmode, $id, $pr
   }
 
   // Middle specific by bundle
-  $include = $prefix ? array($prefix, $entity_type) : array($entity_type);
+  $include = $prefix ? [$prefix, $entity_type] : [$entity_type];
 
   $include[] = $type;
   //  $stack[] = implode('--', $include);
@@ -296,10 +298,10 @@ function _alter_partials_filename_stack($entity_type, $type, $viewmode, $id, $pr
   }
 
   // Most specific includes the id
-  $include = $prefix ? array($prefix, $entity_type, $id) : array(
+  $include = $prefix ? [$prefix, $entity_type, $id] : [
     $entity_type,
     $id,
-  );
+  ];
 
   //  $stack[] = implode('--', $include);
 
