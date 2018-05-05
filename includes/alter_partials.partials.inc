@@ -126,6 +126,16 @@ function _alter_partials_global_vars(&$vars, $build) {
     $global_vars['entity_type_id'] = $build['#entity_type'];
     $global_vars[$build['#entity_type']] = $build['#entity'];
     $global_vars['entity'] = $build['#entity'];
+    // Get the entity id.
+    if (method_exists($build['#entity'], 'identifier')) {
+      $global_vars['entity_id'] = $build['#entity']->identifier();
+    }
+    else {
+      $info = entity_get_info($build['#entity_type']);
+      $key = isset($info['entity keys']['name']) ? $info['entity keys']['name'] : $info['entity keys']['id'];
+      $global_vars['entity_id'] = isset($build['#entity']->$key) ? $build['#entity']->$key : NULL;
+    }
+
     if (module_exists('data_api')) {
       $global_vars['e'] = data_api($build['#entity_type']);
     }
