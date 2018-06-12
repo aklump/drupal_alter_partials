@@ -316,3 +316,104 @@ function _alter_partials_filename_stack($entity_type, $type, $viewmode, $id, $pr
 
   return $stack;
 }
+
+/**
+ * Inserts block-based vars for the alter partial.
+ *
+ * @param  array &$vars
+ * @param  object $block
+ */
+function _alter_partials_block_vars(&$vars, $block, $build, $core_vars) {
+  $vars = [
+      'block' => $block,
+      'module' => $block->module,
+      'delta' => $block->delta,
+      'subject' => $block->subject,
+      'content' => $build[0]['#markup'],
+      'id' => $core_vars['block_html_id'],
+      'zebra' => $core_vars['block_zebra'],
+    ] + $vars;
+}
+
+/**
+ * Renders a theme using the system fallback when an alter partial is not found.
+ *
+ * @param string $hook
+ *   The theme hook name.
+ * @param array $variables
+ *
+ * @return string
+ *   The rendered output.
+ *
+ * @see \theme from which this was taken.
+ */
+function _alter_partials_theme_fallback($hook, array $variables = []) {
+  global $theme_path;
+
+  // Custom insert.
+  $registry = theme_get_registry();
+  $info = $registry[$hook];
+  $info['template'] = $info['alter_partials']['template'];
+  unset($info['alter_partials']['template']);
+  unset($info['function']);
+  unset($info['alter_partials']);
+  // End custom insert.
+
+  $temp = $theme_path;
+  // point path_to_theme() to the currently used theme path:
+  $theme_path = $info['theme path'];
+
+  // Generate the output using either a function or a template.
+  $output = '';
+
+  // Default render function and extension.
+  $render_function = 'theme_render_template';
+  $extension = '.tpl.php';
+
+  // The theme engine may use a different extension and a different renderer.
+  global $theme_engine;
+  if (isset($theme_engine)) {
+    if ($info['type'] != 'module') {
+      if (function_exists($theme_engine . '_render_template')) {
+        $render_function = $theme_engine . '_render_template';
+      }
+      $extension_function = $theme_engine . '_extension';
+      if (function_exists($extension_function)) {
+        $extension = $extension_function();
+      }
+    }
+
+    // In some cases, a template implementation may not have had
+    // template_preprocess() run (for example, if the default implementation is
+    // a function, but a template overrides that default implementation). In
+    // these cases, a template should still be able to expect to have access to
+    // the variables provided by template_preprocess(), so we add them here if
+    // they don't already exist. We don't want to run template_preprocess()
+    // twice (it would be inefficient and mess up zebra striping), so we use the
+    // 'directory' variable to determine if it has already run, which while not
+    // completely intuitive, is reasonably safe, and allows us to save on the
+    // overhead of adding some new variable to track that.
+    if (!isset($variables['directory'])) {
+      $default_template_variables = [];
+      template_preprocess($default_template_variables, $hook);
+      $variables += $default_template_variables;
+    }
+
+    // Render the output using the template file.
+    $template_file = $info['template'] . $extension;
+    if (isset($info['path'])) {
+      $template_file = $info['path'] . '/' . $template_file;
+    }
+    if (variable_get('theme_debug', FALSE)) {
+      $output = _theme_render_template_debug($render_function, $template_file, $variables, $extension);
+    }
+    else {
+      $output = $render_function($template_file, $variables);
+    }
+  }
+
+  // restore path_to_theme()
+  $theme_path = $temp;
+
+  return $output;
+}

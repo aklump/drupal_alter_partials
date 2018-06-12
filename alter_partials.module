@@ -205,3 +205,65 @@ function alter_partials_field_extra_fields() {
 
   return $extra;
 }
+
+/**
+ * Render output for a block.
+ *
+ * This is handled differently from the entity view, because we want any
+ * modifications in the partial to replace the entire block rendering bit, so
+ * that the block wrapper is not used.  This is consistent with how we do
+ * entities.
+ *
+ * @param array $vars
+ *   The variables to send to the template.
+ *
+ * @return string
+ *   The rendered output.
+ */
+function alter_partials_theme_block($vars) {
+  module_load_include('inc', 'alter_partials', 'includes/alter_partials.partials');
+
+  $stack = array_map(function ($item) {
+    return str_replace('_', '-', $item);
+  }, $vars['theme_hook_suggestions']);
+
+  if ($partials = _alter_partials_get_partials($stack)) {
+
+    $block = $vars['block'];
+    $original = [
+      '#alter_partials_type' => 'block',
+      '#alter_partials_module' => $block->module,
+      '#alter_partials_delta' => $block->delta,
+      0 => ['#markup' => $vars['content']],
+    ];
+    $build = $original;
+
+    foreach ($partials as $partial) {
+      $extract_vars = [];
+      _alter_partials_global_vars($extract_vars, $build);
+      _alter_partials_block_vars($extract_vars, $block, $build, $vars);
+      extract($extract_vars);
+      unset($extract_vars);
+      include $partial;
+    }
+
+    if ($build !== $original) {
+      $output = drupal_render($build);
+    }
+  }
+  else {
+    $output = _alter_partials_theme_fallback('block', $vars);
+  }
+
+  return $output;
+}
+
+/**
+ * Implements hook_theme_registry_alter().
+ */
+function alter_partials_theme_registry_alter(&$themes) {
+  $themes['block']['function'] = 'alter_partials_theme_block';
+  $themes['block']['type'] = 'module';
+  $themes['block']['alter_partials'] = ['template' => $themes['block']['template']];
+  unset($themes['block']['template']);
+}
