@@ -50,7 +50,7 @@ An extra field is provided to serve as a UI indicator that the view mode is not 
 
 * During development you can disable the caching and thereby avoid having to drupal cache clear when adding new partials; you should not do this on production though.  To do so add the following line to your settings.php file:
 
-        $conf['alter_partials_cache_enabled'] = FALSE;
+        $conf['alter_partials.settings']['cache'] = false;
 
 * There is an included module `alter_partials_dev` which should not be enabled in a production environment.
 * The above cache disable is accomplished for you when you enable `alter_partials_dev` module, which also provides a block to help with filenames.  Enable the module and visit the blocks admin page and assign it to a region.  That block will populate with all the possible filenames that could have been used for that page (requires JS).

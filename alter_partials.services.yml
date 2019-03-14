@@ -1,0 +1,4 @@
+services:
+  alter_partials:
+    class: Drupal\alter_partials\Service\AlterPartials
+    arguments: []

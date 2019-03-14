@@ -1,0 +1,6 @@
+alter_partials.settings:
+  type: mapping
+  label: Settings
+  mapping:
+    cache:
+      type: boolean

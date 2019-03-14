@@ -1,0 +1,6 @@
+services:
+  init_subscriber:
+    class: Drupal\alter_partials_dev\EventSubscriber\InitSubscriber
+    tags:
+      -
+        name: event_subscriber

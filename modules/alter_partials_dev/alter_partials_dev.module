@@ -7,16 +7,6 @@
  * @{
  */
 
-
-/**
- * Implements hook_init().
- */
-function alter_partials_dev_init() {
-  global $conf;
-  // Turn this off when the dev module is enabled.
-  $conf['alter_partials_cache_enabled'] = FALSE;
-}
-
 /**
  * Implements hook_permission().
  */
@@ -49,7 +39,7 @@ function alter_partials_dev_block_view($delta = '') {
   $block = array();
   switch ($delta) {
     case 'suggestions':
-      if (user_access('alter_partials_dev:access')) {
+      if (\Drupal::currentUser()->hasPermission('alter_partials_dev:access')) {
         $block['subject'] = t('Alter Partials filename suggestions');
         // The content will be added via ajax on page load.
         $block['content'] = array('#markup' => '<div></div>');
@@ -62,7 +52,7 @@ function alter_partials_dev_block_view($delta = '') {
 
 function alter_partials_dev_preprocess_html(&$build) {
   global $_alter_partials_suggestions;
-  if (user_access('alter_partials_dev:access')) {
+  if (\Drupal::currentUser()->hasPermission('alter_partials_dev:access')) {
     $inject_js['#attached']['js'][] = array(
       'type' => 'file',
       'data' => drupal_get_path('module', 'alter_partials_dev') . '/alter_partials_dev.js',
@@ -76,7 +66,7 @@ function alter_partials_dev_preprocess_html(&$build) {
         ),
       ),
     );
-    drupal_render($inject_js);
+    \Drupal::service("renderer")->render($inject_js);
   }
 }
 
@@ -99,7 +89,7 @@ function alter_partials_dev_stub($path_to_output, array $vars) {
  */
 
 EOD;
-  drupal_alter('alter_partials_dev_stub', $stub, $path_to_output);
+  \Drupal::moduleHandler()->alter('alter_partials_dev_stub', $stub, $path_to_output);
   $stub .= PHP_EOL. PHP_EOL . PHP_EOL . file_get_contents($path_to_output);
   file_put_contents($path_to_output, $stub);
 }
