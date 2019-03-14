@@ -41,7 +41,8 @@ function hook_alter_partials_info() {
 /**
  * Implements hook_alter_partials_entities_in_code_alter().
  *
- * $info['#available'] has all the possible options, so you may just want to filter on that array.
+ * $info['#available'] has all the possible options, so you may just want to
+ * filter on that array.
  *
  * Info has a key: #enabled.  Any entity/bundles placed in
  * the #enabled array will receive this extra field.  The array contains
