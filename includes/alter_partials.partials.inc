@@ -49,7 +49,7 @@ function _alter_partials_get_partials($stack, &$discovered = NULL) {
         $index = empty($cache->data) ? NULL : $cache->data;
       }
       else {
-        // Set the default values
+        // Set the default values.
         $index = [];
       }
     }
@@ -109,10 +109,12 @@ function _alter_partials_get_partials($stack, &$discovered = NULL) {
 }
 
 /**
- * Inserts global vars for the alter partials
+ * Inserts global vars for the alter partials.
  *
  * @param  array &$vars
+ *   The variables array.
  * @param  array $build
+ *   The original build array.
  */
 function _alter_partials_global_vars(&$vars, $build) {
   $prop_keys = array_flip(element_properties($build));
@@ -152,6 +154,7 @@ function _alter_partials_global_vars(&$vars, $build) {
  * Inserts node-based vars for the alter partial.
  *
  * @param  array &$vars
+ *   The variables array.
  * @param  object $node
  */
 function _alter_partials_node_vars(&$vars, $node) {
@@ -166,6 +169,7 @@ function _alter_partials_node_vars(&$vars, $node) {
  * Inserts view-based vars for the alter partial.
  *
  * @param  array &$vars
+ *   The variables array.
  * @param  object $view
  */
 function _alter_partials_view_vars(&$vars, $view) {

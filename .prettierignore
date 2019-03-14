@@ -1,0 +1,12 @@
+.idea
+.web_package
+dist
+docs
+documentation
+help
+images
+/includes
+node_modules
+vendor
+bower_components
+*.min.js

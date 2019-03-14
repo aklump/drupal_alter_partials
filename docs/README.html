@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+
+<html>
+<head>
+  <title>Drupal Module: Alter Partials</title>
+  <link href="search/tipuesearch.css" rel="stylesheet">
+  <link href="style.css" rel="stylesheet">
+</head>
+
+<body class="page--readme">
+<header>
+  <div class="pager"><a href="index.html" class="prev index">&laquo;Index</a><a href="index.html" class="index pager__book-title"></a><a href="modules.html" class="next modules">Provide Partials by Module&raquo;</a></div></header>
+<section class="sub-header">
+  <div class="breadcrumbs"><a href="index.html">Index</a>
+         &raquo
+      </div>      <div class="search__wrapper">
+  <form action="search--results.html">
+    <input type="text" class="search-input" name="q" id="tipue_search_input" autocomplete="off" required>
+  </form>
+</div>
+  </section>
+
+
+<h1>Drupal Module: Alter Partials</h1>
+
+<section>
+
+<p><strong>Author:</strong> Aaron Klump  <a href="&#x6d;&#97;&#105;&#x6c;&#x74;&#111;:&#x73;&#111;&#117;&#x72;&#x63;&#101;c&#x6f;&#100;&#101;&#x40;&#x69;&#110;&#116;&#x68;&#x65;&#108;&#x6f;&#x66;&#116;&#115;&#x74;&#x75;&#100;i&#x6f;&#115;&#46;&#x63;&#x6f;&#109;">&#x73;&#111;&#117;&#x72;&#x63;&#101;c&#x6f;&#100;&#101;&#x40;&#x69;&#110;&#116;&#x68;&#x65;&#108;&#x6f;&#x66;&#116;&#115;&#x74;&#x75;&#100;i&#x6f;&#115;&#46;&#x63;&#x6f;&#109;</a></p>
+
+<h2>Summary</h2>
+
+<p><strong>Entity alters using partial files not functions.</strong></p>
+
+<p>This module allows you to use partial files much the same way that you use tpl files in your theme, to alter build arrays.  All files should be placed in a subfolder of your theme called <code>alter_partials</code>.  This is in lieu of placing lots of changes in one big <code>hook_HOOK_alter()</code> function, which may get unruly.</p>
+
+<p>Support exists for several entities and Display Suite.</p>
+
+<p>As an example, to alter display suite layout variables before they are rendered, the files suggestions are the following (where we have page node with nid 17 using view mode of narrow_page):</p>
+
+<p>Pattern is: <code>PREFIX--BUNDLE OR ID--DISPLAY MODE</code>.</p>
+
+<pre><code>alter_partials/ds--node--page--narrow-page.inc
+alter_partials/ds--node--17--narrow-page.inc
+</code></pre>
+
+<p>By creating one of those files in your theme directory and manipulating the <code>$build</code> or <code>$var</code> variables, you will affect change.</p>
+
+<p>For performance reasons, you must include the view mode.</p>
+
+<h2>Installation</h2>
+
+<ol>
+<li>Install as usual, see <a href="http://drupal.org/node/70151">http://drupal.org/node/70151</a> for further information.</li>
+<li>Enable advanced help for more information and examples.</li>
+</ol>
+
+<h2>View modes field</h2>
+
+<p>An extra field is provided to serve as a UI indicator that the view mode is not being configured via the UI, but instead via code.  It reads <em>Display managed in code</em>.  The intention is that for a given display mode, you can show only this field and it will be a clear sign to the content managers why they cannot configure the view mode using normal field means.  For more info see <code>hook_alter_partials_entities_in_code_alter()</code>.
+* When you create a partial file, it should automatically cause this new view mode field to appear; if it doesn't look into <code>hook_alter_partials_entities_in_code_alter()</code></p>
+
+<h2>Advanced Configuration</h2>
+
+<ol>
+<li>It is possible for modules to provide alter partials as well.  Refer to <code>alter_partials.api.php</code> for more info.</li>
+</ol>
+
+<h2>Usage</h2>
+
+<table>
+<thead>
+<tr>
+  <th>Type</th>
+  <th>Prefix</th>
+  <th>Vars</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+  <td>Node</td>
+  <td><code>node--</code></td>
+  <td>&amp;$build, $node</td>
+</tr>
+<tr>
+  <td>User</td>
+  <td><code>user--</code></td>
+  <td>&amp;$build</td>
+</tr>
+<tr>
+  <td>Taxonomy Term</td>
+  <td><code>taxonomy-term--</code></td>
+  <td>&amp;$build</td>
+</tr>
+<tr>
+  <td>Display Suite</td>
+  <td><code>ds--ENTITY TYPE</code></td>
+  <td>&amp;$build, &amp;$vars*, $node</td>
+</tr>
+</tbody>
+</table>
+
+<p>&#42; <code>$vars</code>: These are the variables from node_preprocess, before node_process.</p>
+
+<h2>Development</h2>
+
+<ul>
+<li><p>During development you can disable the caching and thereby avoid having to drupal cache clear when adding new partials; you should not do this on production though.  To do so add the following line to your settings.php file:</p>
+
+<pre><code>$conf['alter_partials_cache_enabled'] = FALSE;
+</code></pre></li>
+<li><p>There is an included module <code>alter_partials_dev</code> which should not be enabled in a production environment.</p></li>
+<li>The above cache disable is accomplished for you when you enable <code>alter_partials_dev</code> module, which also provides a block to help with filenames.  Enable the module and visit the blocks admin page and assign it to a region.  That block will populate with all the possible filenames that could have been used for that page (requires JS).</li>
+</ul>
+
+<h2>Design Decisions/Rationale</h2>
+
+<p>With the move toward smaller partials like in SASS I though it would be easier to manage code doing things this way rather than hundreds of lines of a function all wrapped in node_view_alter().</p>
+
+<h2>Contact</h2>
+
+<ul>
+<li><strong>In the Loft Studios</strong></li>
+<li>Aaron Klump - Developer</li>
+<li>PO Box 29294 Bellingham, WA 98228-1294</li>
+<li><em>skype</em>: intheloftstudios</li>
+<li><em>d.o</em>: aklump</li>
+<li><a href="http://www.InTheLoftStudios.com">http://www.InTheLoftStudios.com</a></li>
+</ul>
+</section>
+
+<div class="search__results">
+  <div id="tipue_search_content"></div>
+</div>
+
+<footer>
+  <div class="pager"><a href="index.html" class="prev index">&laquo;Index</a><a href="index.html" class="index pager__book-title"></a><a href="modules.html" class="next modules">Provide Partials by Module&raquo;</a></div>  
+  <div id="footer-legaleeze">
+    <p class="legaleeze center">Version: 1.0 &bull; Last Updated: Wed, 13 Mar 2019 20:33:27 -0700</p>
+  </div>
+</footer>
+
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.4/jquery.min.js"></script>
+  <script src="search/tipuesearch_content.js"></script>
+  <script src="search/tipuesearch_set.js"></script>
+  <script src="search/tipuesearch.min.js"></script>
+  <script>
+    $(document).ready(function() {
+      $('#tipue_search_input').tipuesearch()
+    })
+  </script>
+<script src="js/core.js"></script>
+</body>
+</html>
+
