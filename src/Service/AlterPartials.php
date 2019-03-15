@@ -41,6 +41,8 @@ class AlterPartials {
   }
 
   public function getPartials(array $stack) {
+
+    // TODO Need to refactor this, probably not a global anymore. 2019-03-15T09:08, aklump
     global $_alter_partials_suggestions;
     if (!is_array($_alter_partials_suggestions)) {
       $_alter_partials_suggestions = [];

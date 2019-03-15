@@ -68,6 +68,10 @@ class AlterPartialsUnitTest extends UnitTestBase {
       ['node', NULL],
       "/path/to/node--default.inc",
     ];
+    $tests[] = [
+      ['node', 'page'],
+      "/path/to/node--page--default.inc",
+    ];
 
     return $tests;
   }
