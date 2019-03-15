@@ -31,9 +31,8 @@ die;
 
 What Happened?
 
-     * In it's simplest form, use a partial file to alter $build and you
-       can control the output of things using render arrays
-       programatically.
+   In it's simplest form, use a partial file to alter $build and you can
+   control the output of things using render arrays programatically.
 
    This module allows you to use partial files much the same way that you
    use tpl files in your theme, to alter build arrays. All files should be
@@ -47,12 +46,6 @@ What Happened?
    the $build or $var variables, you will affect change.
 
    For performance reasons, you must include the view mode.
-
-Installation
-
-    1. Install as usual, see [2]http://drupal.org/node/70151 for further
-       information.
-    2. Enable advanced help for more information and examples.
 
 View modes field
 
@@ -71,17 +64,6 @@ Advanced Configuration
 
     1. It is possible for modules to provide alter partials as well. Refer
        to alter_partials.api.php for more info.
-
-Usage
-
-       Type          Prefix               Vars
-   Node          node--          &$build, $node
-   User          user--          &$build
-   Taxonomy Term taxonomy-term-- &$build
-   Display Suite ds--ENTITY TYPE &$build, &$vars*, $node
-
-   * $vars: These are the variables from node_preprocess, before
-   node_process.
 
 Development
 
@@ -113,10 +95,9 @@ Contact
      * PO Box 29294 Bellingham, WA 98228-1294
      * skype: intheloftstudios
      * d.o: aklump
-     * [3]http://www.InTheLoftStudios.com
+     * [2]http://www.InTheLoftStudios.com
 
 References
 
    1. mailto:sourcecode@intheloftstudios.com
-   2. http://drupal.org/node/70151
-   3. http://www.InTheLoftStudios.com/
+   2. http://www.InTheLoftStudios.com/
