@@ -9,6 +9,7 @@
 
 use Drupal\Core\Entity\Display\EntityViewDisplayInterface;
 use Drupal\Core\Entity\EntityInterface;
+use Drupal\Core\Render\Element;
 
 /**
  * Provide a generic alter partials path for anything.
@@ -154,38 +155,63 @@ function alter_partials_entity_view_alter(array &$build, EntityInterface $entity
 }
 
 /**
- * Implements hook_field_extra_fields().
+ * Implements hook_entity_extra_field_info().
  *
  * Creates an extra field that can be used in the manage display section
- * to indicate to CM's that the display mode is not configured via the UI.
+ * to indicate to content managers that the display mode is not configured via
+ * the UI.
  */
-function alter_partials_field_extra_fields() {
-  $info = \Drupal::entityManager()->getDefinitions();
+function alter_partials_entity_extra_field_info() {
+  $service = \Drupal::service('alter_partials');
+  $all_partials = array_map(function ($name) use ($service) {
+    return $service->getEntityTypeAndBundleByPartialFilename($name);
+  }, $service->getAllAvailablePartials());
+  $entities_with_partials = array_map(function ($parts) {
+    return $parts[0];
+  }, $all_partials);
+
+
+  $bundle_info_service = \Drupal::service('entity_type.bundle.info');
+  $entity_info = \Drupal::entityManager()->getDefinitions();
+  $available = [];
+  foreach ($entity_info as $entity_type => $info) {
+    foreach ($bundle_info_service->getBundleInfo($entity_type) as $bundle => $bundle_info) {
+      $available[$entity_type][$bundle] = $bundle;
+    }
+  }
+
   $entities = [];
-  foreach ($info as $entity_type => $i) {
-    $entities['#available'][$entity_type] = array_keys($i['bundles']);
-  }
+  $entities['#available'] = array_map('array_values', $available);
 
-  // Auto-discover based on discovered partials files.
-  $discovered = \Drupal::service('alter_partials')->getAllAvailablePartials();
+  $entity_info = array_filter($entity_info, function ($key) use ($entities_with_partials) {
+    return in_array($key, $entities_with_partials);
+  }, ARRAY_FILTER_USE_KEY);
 
-  // TODO Do we need this next?
-  \Drupal::service('alter_partials')->getPartials([]);
-  foreach (array_keys($discovered) as $name) {
-    list($entity, $type) = explode('--', $name . '--');
-    $entity = str_replace('-', '_', $entity);
-    $type = str_replace('-', '_', $type);
-    $entities[$entity][$type] = $type;
-  }
+  foreach ($entity_info as $entity_type => $info) {
+    foreach ($bundle_info_service->getBundleInfo($entity_type) as $bundle => $bundle_info) {
+      $is_in_code = array_filter($all_partials, function ($partial) use ($entity_type, $bundle) {
+        return $partial == [
+            $entity_type,
+            $bundle,
+          ] || empty($partial[1]) && $partial[0] === $entity_type;
+      });
+      if ($is_in_code) {
+        if (empty($bundle)) {
+          $entities[$entity_type] = $available[$entity_type];
+        }
+        else {
+          $entities[$entity_type][] = $bundle;
+        }
+      }
+    }
+  };
 
-  foreach (\Drupal\Core\Render\Element::children($entities) as $entity_type) {
-    $entities[$entity_type] = array_keys($entities[$entity_type]);
-  }
   \Drupal::moduleHandler()->alter('alter_partials_entities_in_code', $entities);
 
-  foreach (\Drupal\Core\Render\Element::children($entities) as $entity_type) {
-    foreach ($entities[$entity_type] as $bundle_type) {
-      $extra[$entity_type][$bundle_type]['display'] = [
+  $extra = [];
+  foreach (Element::children($entities) as $entity_type) {
+    foreach ($entities[$entity_type] as $bundle) {
+      $extra[$entity_type][$bundle]['display'] = [
         'alter_partials_version_in_code' => [
           'label' => t('Display managed in code'),
           'weight' => 0,
@@ -200,11 +226,12 @@ function alter_partials_field_extra_fields() {
 /**
  * Implements hook_alter_partials_info().
  *
- * Return the current theme's alter_partials directory if it exists.
+ * Automatically register the default theme as providing alter partials based
+ * on the existence of the directory.
  */
 function alter_partials_alter_partials_info() {
-  if (($theme = \Drupal::service('theme.manager')->getActiveTheme())
-    && ($theme_folder = \Drupal::root() . '/' . drupal_get_path('theme', $theme->getName()) . '/alter_partials')
+  $config = \Drupal::service('config.factory')->get('system.theme');
+  if (($theme_folder = \Drupal::root() . '/' . drupal_get_path('theme', $config->get('default')) . '/alter_partials')
     && is_dir($theme_folder)) {
     return [
       'directory' => [

@@ -132,6 +132,33 @@ class AlterPartials {
   }
 
   /**
+   * Given an alter partial filepath, return the entity type and bundle.
+   *
+   * @param string $filename
+   *   The path to the alter partial.
+   *
+   * @return array
+   *   - 0 The entity type.
+   *   - 1 The bundle type.
+   */
+  public function getEntityTypeAndBundleByPartialFilename(string $filename): array {
+    $name = pathinfo($filename, PATHINFO_FILENAME);
+    $parts = explode('--', $name);
+    $entity_type = array_shift($parts);
+    $bundle = NULL;
+    if (count($parts) > 1) {
+      $bundle = array_shift($parts);
+    }
+
+    // TODO Make this based on checking if an entity has bundles?
+    elseif (!in_array($entity_type, ['node'])) {
+      $bundle = $entity_type;
+    }
+
+    return [$entity_type, $bundle];
+  }
+
+  /**
    * Return a stack of filepaths to check for alters for this build array.
    *
    * @param  array $build The render array

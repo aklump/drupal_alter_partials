@@ -29,24 +29,24 @@ function hook_alter_partials_entity_stack_alter(&$stack, $build) {
  *
  */
 function hook_alter_partials_info() {
-  return array(
-    'directory' => array(
-      'module' => array(
+  return [
+    'directory' => [
+      'module' => [
         drupal_get_path('module', 'my_module') . '/alter_partials',
-      ),
-    ),
-  );
+      ],
+    ],
+  ];
 }
 
 /**
  * Implements hook_alter_partials_entities_in_code_alter().
  *
- * $info['#available'] has all the possible options, so you may just want to
- * filter on that array.
+ * $info['#available'] holds all available entity types and their bundle names,
+ * so you may just want to filter on that array.
  *
- * Info has a key: #enabled.  Any entity/bundles placed in
- * the #enabled array will receive this extra field.  The array contains
- * all possibilies as reference.
+ * To cause an entity to have extra fields add the entity_type as a key to
+ * $info, and give the value of that new element an array of the bundles to
+ * which the extra fields should apply.
  */
 function hook_alter_partials_entities_in_code_alter(&$info) {
   $info['bean'] = $info['#available']['bean'];

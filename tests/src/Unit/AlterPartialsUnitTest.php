@@ -55,6 +55,32 @@ class AlterPartialsUnitTest extends UnitTestBase {
     ];
   }
 
+  /**
+   * Provides data for testGetEntityTypeAndBundleByPartialFilename.
+   */
+  public function dataForTestGetEntityTypeAndBundleByPartialFilenameProvider() {
+    $tests = [];
+    $tests[] = [
+      ['block', 'block'],
+      "/path/to/block--default.inc",
+    ];
+    $tests[] = [
+      ['node', NULL],
+      "/path/to/node--default.inc",
+    ];
+
+    return $tests;
+  }
+
+  /**
+   * @dataProvider dataForTestGetEntityTypeAndBundleByPartialFilenameProvider
+   */
+  public function testGetEntityTypeAndBundleByPartialFilename($control, $filename) {
+    list($entity_type, $bundle) = $this->obj->getEntityTypeAndBundleByPartialFilename($filename);
+    $this->assertSame($control[0], $entity_type);
+    $this->assertSame($control[1], $bundle);
+  }
+
   public function testStackCanBeAltered() {
     $build = ['#entity_type' => 'user', '#user' => $this->user];
     $this->args->moduleHandler = \Mockery::mock(ModuleHandlerInterface::class);
