@@ -2,12 +2,43 @@
 
 namespace Drupal\alter_partials\Service;
 
+use Drupal\Core\Cache\Cache;
+use Drupal\Core\Cache\CacheBackendInterface;
+use Drupal\Core\Config\ConfigFactoryInterface;
+use Drupal\Core\Entity\EntityTypeManagerInterface;
+use Drupal\Core\Extension\ModuleHandlerInterface;
+use Drupal\Core\Language\LanguageManagerInterface;
+use Drupal\Core\Render\Element;
 use Drupal\Core\Url;
 
 /**
  * Core functionality provided by the alter_partials module.
  */
 class AlterPartials {
+
+  protected $languageManager;
+
+  protected $entityTypeManager;
+
+  protected $moduleHandler;
+
+  protected $configFactory;
+
+  protected $cache;
+
+  public function __construct(
+    ConfigFactoryInterface $config_factory,
+    LanguageManagerInterface $language_manager,
+    EntityTypeManagerInterface $entity_type_manager,
+    ModuleHandlerInterface $module_handler,
+    CacheBackendInterface $cache_backend
+  ) {
+    $this->configFactory = $config_factory;
+    $this->languageManager = $language_manager;
+    $this->entityTypeManager = $entity_type_manager;
+    $this->moduleHandler = $module_handler;
+    $this->cache = $cache_backend;
+  }
 
   public function getPartials(array $stack) {
     global $_alter_partials_suggestions;
@@ -50,9 +81,10 @@ class AlterPartials {
     }
     $index = &$drupal_static_fast['index'];
     if (!isset($index)) {
-      $caching = \Drupal::config('alter_partials.settings')->get('cache');
+      $caching = $this->configFactory->get('alter_partials.settings')
+        ->get('cache');
       if ($caching) {
-        if ($cache = \Drupal::cache('cache')->get('alter_partials:partials')) {
+        if ($cache = $this->cache > get('alter_partials:partials')) {
           $index = empty($cache->data) ? NULL : $cache->data;
         }
         else {
@@ -62,9 +94,9 @@ class AlterPartials {
       }
       if (empty($index)) {
         // Search the filesystem for directories.
-        $info = \Drupal::moduleHandler()->invokeAll('alter_partials_info');
-        \Drupal::moduleHandler()->alter('alter_partials_info', $info, $stack);
-        $dirs = $info['directory'];
+        $info = $this->moduleHandler->invokeAll('alter_partials_info');
+        $this->moduleHandler->alter('alter_partials_info', $info, $stack);
+        $dirs = $info['directory'] ?? [];
         $found = [];
         if (isset($dirs['module'])) {
           if (!is_array($dirs['module'])) {
@@ -91,8 +123,7 @@ class AlterPartials {
         }
 
         if ($caching) {
-          \Drupal::cache('cache')
-            ->set('alter_partials:partials', $index, \Drupal\Core\Cache\Cache::PERMANENT);
+          $this->cache->set('alter_partials:partials', $index, Cache::PERMANENT);
         }
       }
     }
@@ -104,48 +135,47 @@ class AlterPartials {
    * Return a stack of filepaths to check for alters for this build array.
    *
    * @param  array $build The render array
-   * @param  string $type This may not be the bundle type in all cases, e.g.
-   *                       'ds'.
    *
    * @return array  Files should be tested from the last to the first.
    */
-  public function getEntityStack($build) {
+  public function getStack($build) {
     $stack = [];
-
-    $type = isset($build['#entity_type']) ? $build['#entity_type'] : NULL;
-
+    $type = $build['#entity_type'] ?? NULL;
     $key = NULL;
+    $category = NULL;
     switch ($type) {
       case 'taxonomy_term':
-        $key = '#term';
+        $entity = $build['name']['#object'];
         break;
 
       case 'node':
-        $key = '#node';
+        $entity = $build['#node'];
+        $category = $build['#node']->getType();
+        break;
+
+      case 'block':
+        $entity = $build['#block'];
+        $category = $build['#plugin_id'];
         break;
 
       case 'user':
-        $key = '#account';
+        $entity = $build['#user'];
         break;
 
       default:
-        if (isset($build['#entity'])) {
-          $key = '#entity';
-        }
+        $entity = $build['#entity'] ?? NULL;
         break;
     }
-    $entity = $key && isset($build[$key]) ? $build[$key] : NULL;
 
     if ($entity) {
-      list($id, $vid, $bundle) = entity_extract_ids($build['#entity_type'], $entity);
-      $view_mode = $build['#view_mode'];
-
+      $id = $entity->id();
+      $view_mode = $build['#view_mode'] ?? 'default';
       if (!empty($id)) {
-        $stack = \Drupal::service('alter_partials')
-          ->getFilenameStack($build['#entity_type'], $bundle, $view_mode, $id);
+        $stack = $this
+          ->getFilenameStack($build['#entity_type'], $category, $view_mode, $id);
       }
     }
-    elseif (isset($build['#alter_partials_type'])) {
+    elseif (!empty($build['#alter_partials_type'])) {
       $stack = [];
       $stack[] = implode('--', [
         $build['#alter_partials_type'],
@@ -169,10 +199,10 @@ class AlterPartials {
       $file = str_replace('_', '-', $file);
     }
 
-    \Drupal::moduleHandler()
+    $this->moduleHandler
       ->alter('alter_partials_entity_stack', $stack, $build);
 
-    return $stack;
+    return array_values($stack);
   }
 
   /**
@@ -184,7 +214,7 @@ class AlterPartials {
    *
    * @return array
    */
-  public function getFilenameStack($entity_type, $type, $viewmode, $id, $prefix = '') {
+  public function getFilenameStack($entity_type, $bundle_or_category, $viewmode, $id, $prefix = '') {
     $stack = [];
 
     // Least specific.
@@ -199,10 +229,12 @@ class AlterPartials {
     }
 
     // Middle specific by bundle.
-    $include = $prefix ? [$prefix, $entity_type] : [$entity_type];
-    $include[] = $type;
-    $include[] = $viewmode;
-    $stack[] = implode('--', $include);
+    if ($bundle_or_category) {
+      $include = $prefix ? [$prefix, $entity_type] : [$entity_type];
+      $include[] = $bundle_or_category;
+      $include[] = $viewmode;
+      $stack[] = implode('--', $include);
+    }
 
     if ($viewmode !== 'default') {
       array_pop($include);
@@ -248,7 +280,7 @@ class AlterPartials {
     $vars = [
         'node' => $node,
         'entity' => $node,
-        'lang' => ($l = $node->language) ? $l : language_default(),
+        'lang' => $node->language(),
       ] + $vars;
   }
 
@@ -259,10 +291,10 @@ class AlterPartials {
    *   The variables array.
    * @param  object $view
    */
-  public function getViewVars(array &$vars, $view) {
+  public function addViewVars(array &$vars, $view) {
     $vars = [
         'view' => $view,
-        'name' => $view->name,
+        'name' => $view->id(),
         'display_id' => $view->current_display,
       ] + $vars;
   }
@@ -275,15 +307,11 @@ class AlterPartials {
    * @param array $build
    * @param array $core_vars
    */
-  public function addBlockVars(array &$vars, $block, array $build, array $core_vars) {
+  public function addBlockVars(array &$vars, $block, array $build) {
     $vars = [
         'block' => $block,
-        'module' => $block->module,
-        'delta' => $block->delta,
-        'subject' => $block->subject,
-        'content' => $build[0]['#markup'],
-        'id' => $core_vars['block_html_id'],
-        'zebra' => $core_vars['block_zebra'],
+        'id' => $build['#id'],
+        'plugin_id' => $build['#plugin_id'],
       ] + $vars;
   }
 
@@ -296,13 +324,15 @@ class AlterPartials {
    *   The original build array.
    */
   public function addGlobalVars(array &$vars, array $build) {
-    $prop_keys = array_flip(\Drupal\Core\Render\Element::properties($build));
+    $prop_keys = array_flip(Element::properties($build));
     $global_vars = [
       'original' => $build,
       'build' => $build,
       'elements' => array_diff_key($build, $prop_keys),
       'properties' => array_intersect_key($build, $prop_keys),
-      'lang' => isset($build['#language']) ? $build['#language'] : language_default(),
+      'lang' => $build['#language'] ?? $this->languageManager
+          ->getDefaultLanguage()
+          ->getId(),
     ];
     if (isset($build['#entity']) && isset($build['#entity_type'])) {
       $global_vars['entity_type_id'] = $build['#entity_type'];
@@ -314,12 +344,12 @@ class AlterPartials {
         $global_vars['entity_id'] = $build['#entity']->identifier();
       }
       else {
-        $info = \Drupal::entityManager()->getDefinition($build['#entity_type']);
+        $info = $this->entityTypeManager->getDefinition($build['#entity_type']);
         $key = isset($info['entity keys']['name']) ? $info['entity keys']['name'] : $info['entity keys']['id'];
         $global_vars['entity_id'] = isset($build['#entity']->$key) ? $build['#entity']->$key : NULL;
       }
 
-      if (\Drupal::moduleHandler()->moduleExists('data_api')) {
+      if ($this->moduleHandler->moduleExists('data_api')) {
         $global_vars['e'] = data_api($build['#entity_type']);
       }
     }

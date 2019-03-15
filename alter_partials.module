@@ -7,6 +7,9 @@
  * @{
  */
 
+use Drupal\Core\Entity\Display\EntityViewDisplayInterface;
+use Drupal\Core\Entity\EntityInterface;
+
 /**
  * Provide a generic alter partials path for anything.
  *
@@ -37,7 +40,7 @@ function alter_partials_custom(&$build, $vars, $type, $category = '', $version =
   $build['#alter_partials_version'] = $version;
   $build['#alter_partials_vars'] = $vars;
   $service = \Drupal::service('alter_partials');
-  $stack = $service->getEntityStack($build);
+  $stack = $service->getStack($build);
 
   if ($partials = $service->getPartials($stack)) {
     foreach ($partials as $partial) {
@@ -53,7 +56,7 @@ function alter_partials_custom(&$build, $vars, $type, $category = '', $version =
 /**
  * Implements hook_views_prerender_().
  */
-function _alter_partials_preprocess_views_view(&$vars) {
+function alter_partials_preprocess_views_view(&$vars) {
   $view = $vars['view'];
   $data = $view->result;
   foreach ($data as &$result) {
@@ -61,26 +64,25 @@ function _alter_partials_preprocess_views_view(&$vars) {
   }
   $original = [
     '#alter_partials_type' => 'view',
-    '#alter_partials_category' => $view->name,
+    '#alter_partials_category' => $view->id(),
     '#alter_partials_version' => $view->current_display,
     0 => ['#markup' => $vars['rows']],
   ];
   $build = $original;
   $service = \Drupal::service('alter_partials');
-
-  $stack = $service->getEntityStack($build);
+  $stack = $service->getStack($build);
   if ($partials = $service->getPartials($stack)) {
     foreach ($partials as $partial) {
       $extract_vars = [];
       $service->addGlobalVars($extract_vars, $build);
-      $service->getViewVars($extract_vars, $view);
+      $service->addViewVars($extract_vars, $view);
       extract($extract_vars);
       unset($extract_vars);
       include $partial;
     }
   }
   if ($build !== $original) {
-    $vars['rows'] = \Drupal::service("renderer")->render($build);
+    $vars['rows'] = $build;
   }
 }
 
@@ -110,19 +112,17 @@ function alter_partials_page_alter(&$build) {
   }
 }
 
-/**
- * Implements hook_entity_view_alter().
- */
-function alter_partials_entity_view_alter(&$build, $entity_type) {
+function alter_partials_block_view_alter(array &$build, \Drupal\Core\Block\BlockPluginInterface $block) {
   $service = \Drupal::service('alter_partials');
-  $stack = $service->getEntityStack($build);
+  $build['#entity_type'] = 'block';
+  $stack = $service->getStack($build);
   if ($partials = $service->getPartials($stack)) {
     foreach ($partials as $partial) {
       // Prepare vars for use by the file.
       $extract_vars = [];
       $service->addGlobalVars($extract_vars, $build);
-      if (isset($build['#node'])) {
-        $service->addNodeVars($extract_vars, $build['#node']);
+      if (isset($build['#block'])) {
+        $service->addBlockVars($extract_vars, $build['#block'], $build);
       }
       extract($extract_vars);
       unset($extract_vars);
@@ -132,21 +132,19 @@ function alter_partials_entity_view_alter(&$build, $entity_type) {
 }
 
 /**
- * Implements hook_ds_pre_render_alter().
+ * Implements hook_entity_view_alter().
  */
-function alter_partials_ds_pre_render_alter(&$build, $context, &$vars) {
-  list($id, $vid, $bundle) = entity_extract_ids($context['entity_type'], $context['entity']);
-
-  $stack = \Drupal::service('alter_partials')
-    ->getFilenameStack($context['entity_type'], $bundle, $context['view_mode'], $id, 'ds');
+function alter_partials_entity_view_alter(array &$build, EntityInterface $entity, EntityViewDisplayInterface $display) {
   $service = \Drupal::service('alter_partials');
+  $build['#entity_type'] = $entity->getEntityType()->id();
+  $stack = $service->getStack($build);
   if ($partials = $service->getPartials($stack)) {
     foreach ($partials as $partial) {
       // Prepare vars for use by the file.
       $extract_vars = [];
       $service->addGlobalVars($extract_vars, $build);
-      if ($context['entity_type'] === 'node') {
-        $service($extract_vars, $context['entity']);
+      if (isset($build['#node'])) {
+        $service->addNodeVars($extract_vars, $build['#node']);
       }
       extract($extract_vars);
       unset($extract_vars);
@@ -206,7 +204,7 @@ function alter_partials_field_extra_fields() {
  */
 function alter_partials_alter_partials_info() {
   if (($theme = \Drupal::service('theme.manager')->getActiveTheme())
-    && ($theme_folder = drupal_get_path('theme', $theme) . '/alter_partials')
+    && ($theme_folder = \Drupal::root() . '/' . drupal_get_path('theme', $theme->getName()) . '/alter_partials')
     && is_dir($theme_folder)) {
     return [
       'directory' => [
@@ -217,157 +215,4 @@ function alter_partials_alter_partials_info() {
     ];
   }
   return [];
-}
-
-/**
- * Implements hook_theme_registry_alter().
- */
-function alter_partials_theme_registry_alter(&$themes) {
-  $themes['block']['function'] = 'alter_partials_theme_block';
-  $themes['block']['type'] = 'module';
-  $themes['block']['alter_partials'] = ['template' => $themes['block']['template']];
-  unset($themes['block']['template']);
-}
-
-/**
- * Render output for a block.
- *
- * This is handled differently from the entity view, because we want any
- * modifications in the partial to replace the entire block rendering bit, so
- * that the block wrapper is not used.  This is consistent with how we do
- * entities.
- *
- * @param array $vars
- *   The variables to send to the template.
- *
- * @return string
- *   The rendered output.
- */
-function alter_partials_process_block($vars) {
-  $service = \Drupal::service('alter_partials');
-
-  $stack = [$vars['theme_hook_original']];
-  if (!empty($vars['theme_hook_suggestions'])) {
-    $stack = array_merge($stack, $vars['theme_hook_suggestions']);
-  }
-  $stack = array_map(function ($item) {
-    return str_replace('_', '-', $item);
-  }, $stack);
-
-  if ($partials = $service->getPartials($stack)) {
-    $block = $vars['block'];
-    $original = [
-      '#alter_partials_type' => 'block',
-      '#alter_partials_module' => $block->module,
-      '#alter_partials_delta' => $block->delta,
-      0 => ['#markup' => $vars['content']],
-    ];
-    $build = $original;
-
-    foreach ($partials as $partial) {
-      $extract_vars = [];
-      $service->getPartials->addGlobalVars($extract_vars, $build);
-      $service->getPartials->addBlockVars($extract_vars, $block, $build, $vars);
-      extract($extract_vars);
-      unset($extract_vars);
-      include $partial;
-    }
-
-    if ($build !== $original) {
-      $output = \Drupal::service("renderer")->render($build);
-    }
-  }
-  else {
-    $output = _alter_partials_theme_fallback('block', $vars);
-  }
-
-  return $output;
-}
-
-/**
- * Renders a theme using the system fallback when an alter partial is not found.
- *
- * @param string $hook
- *   The theme hook name.
- * @param array $variables
- *
- * @return string
- *   The rendered output.
- *
- * @see \theme from which this was taken.
- */
-function _alter_partials_theme_fallback($hook, array $variables = []) {
-  global $theme_path;
-
-  // Custom insert.
-  $registry = \Drupal::service('theme.registry')->get();
-  $info = $registry[$hook];
-  $info['template'] = $info['alter_partials']['template'];
-  unset($info['alter_partials']['template']);
-  unset($info['function']);
-  unset($info['alter_partials']);
-  // End custom insert.
-
-  $temp = $theme_path;
-  // point path_to_theme() to the currently used theme path:
-  $theme_path = $info['theme path'];
-
-  // Generate the output using either a function or a template.
-  $output = '';
-
-  // Default render function and extension.
-  $render_function = 'theme_render_template';
-  $extension = '.tpl.php';
-
-  // The theme engine may use a different extension and a different renderer.
-  global $theme_engine;
-  if (isset($theme_engine)) {
-    if ($info['type'] != 'module') {
-      if (function_exists($theme_engine . '_render_template')) {
-        $render_function = $theme_engine . '_render_template';
-      }
-      $extension_function = $theme_engine . '_extension';
-      if (function_exists($extension_function)) {
-        $extension = $extension_function();
-      }
-    }
-
-    // In some cases, a template implementation may not have had
-    // template_preprocess() run (for example, if the default implementation is
-    // a function, but a template overrides that default implementation). In
-    // these cases, a template should still be able to expect to have access to
-    // the variables provided by template_preprocess(), so we add them here if
-    // they don't already exist. We don't want to run template_preprocess()
-    // twice (it would be inefficient and mess up zebra striping), so we use the
-    // 'directory' variable to determine if it has already run, which while not
-    // completely intuitive, is reasonably safe, and allows us to save on the
-    // overhead of adding some new variable to track that.
-    if (!isset($variables['directory'])) {
-      $default_template_variables = [];
-      template_preprocess($default_template_variables, $hook);
-      $variables += $default_template_variables;
-    }
-
-    // Render the output using the template file.
-    $template_file = $info['template'] . $extension;
-    if (isset($info['path'])) {
-      $template_file = $info['path'] . '/' . $template_file;
-    }
-    // @FIXME
-    // // @FIXME
-    // // This looks like another module's variable. You'll need to rewrite this call
-    // // to ensure that it uses the correct configuration object.
-    // if (variable_get('theme_debug', FALSE)) {
-    //       $output = _theme_render_template_debug($render_function, $template_file, $variables, $extension);
-    //     }
-    //     else {
-    //       $output = $render_function($template_file, $variables);
-    //     }
-
-  }
-
-  // restore path_to_theme()
-  $theme_path = $temp;
-
-  return $output;
 }

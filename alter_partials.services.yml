@@ -1,4 +1,4 @@
 services:
   alter_partials:
     class: Drupal\alter_partials\Service\AlterPartials
-    arguments: []
+    arguments: ['@config.factory', '@language_manager', '@entity_type.manager', '@module_handler', '@cache.data']
