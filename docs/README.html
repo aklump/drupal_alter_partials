@@ -9,7 +9,7 @@
 
 <body class="page--readme">
 <header>
-  <div class="pager"><a href="index.html" class="prev index">&laquo;Index</a><a href="index.html" class="index pager__book-title"></a><a href="modules.html" class="next modules">Provide Partials by Module&raquo;</a></div></header>
+  <div class="pager"><a href="index.html" class="prev index">&laquo;Alter Partials D8</a><a href="index.html" class="index pager__book-title">Alter Partials D8</a><a href="modules.html" class="next modules">Provide Partials by Module&raquo;</a></div></header>
 <section class="sub-header">
   <div class="breadcrumbs"><a href="index.html">Index</a>
          &raquo
@@ -58,9 +58,7 @@ die;
 
 <h2>What Happened?</h2>
 
-<ul>
-<li>In it's simplest form, use a partial file to alter <code>$build</code> and you can control the output of things using render arrays programatically.</li>
-</ul>
+<p>In it's simplest form, use a partial file to alter <code>$build</code> and you can control the output of things using render arrays programatically.</p>
 
 <p>This module allows you to use partial files much the same way that you use tpl files in your theme, to alter build arrays.  All files should be placed in a subfolder of your theme called <code>alter_partials</code>.  This is in lieu of placing lots of changes in one big <code>hook_HOOK_alter()</code> function, which may get unruly.</p>
 
@@ -69,13 +67,6 @@ die;
 <p>By creating one of those files in your theme directory and manipulating the <code>$build</code> or <code>$var</code> variables, you will affect change.</p>
 
 <p>For performance reasons, you must include the view mode.</p>
-
-<h2>Installation</h2>
-
-<ol>
-<li>Install as usual, see <a href="http://drupal.org/node/70151">http://drupal.org/node/70151</a> for further information.</li>
-<li>Enable advanced help for more information and examples.</li>
-</ol>
 
 <h2>View modes field</h2>
 
@@ -87,42 +78,6 @@ die;
 <ol>
 <li>It is possible for modules to provide alter partials as well.  Refer to <code>alter_partials.api.php</code> for more info.</li>
 </ol>
-
-<h2>Usage</h2>
-
-<table>
-<thead>
-<tr>
-  <th>Type</th>
-  <th>Prefix</th>
-  <th>Vars</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-  <td>Node</td>
-  <td><code>node--</code></td>
-  <td>&amp;$build, $node</td>
-</tr>
-<tr>
-  <td>User</td>
-  <td><code>user--</code></td>
-  <td>&amp;$build</td>
-</tr>
-<tr>
-  <td>Taxonomy Term</td>
-  <td><code>taxonomy-term--</code></td>
-  <td>&amp;$build</td>
-</tr>
-<tr>
-  <td>Display Suite</td>
-  <td><code>ds--ENTITY TYPE</code></td>
-  <td>&amp;$build, &amp;$vars*, $node</td>
-</tr>
-</tbody>
-</table>
-
-<p>&#42; <code>$vars</code>: These are the variables from node_preprocess, before node_process.</p>
 
 <h2>Development</h2>
 
@@ -156,9 +111,9 @@ die;
 </div>
 
 <footer>
-  <div class="pager"><a href="index.html" class="prev index">&laquo;Index</a><a href="index.html" class="index pager__book-title"></a><a href="modules.html" class="next modules">Provide Partials by Module&raquo;</a></div>  
+  <div class="pager"><a href="index.html" class="prev index">&laquo;Alter Partials D8</a><a href="index.html" class="index pager__book-title">Alter Partials D8</a><a href="modules.html" class="next modules">Provide Partials by Module&raquo;</a></div>  
   <div id="footer-legaleeze">
-    <p class="legaleeze center">Version: 1.0 &bull; Last Updated: Fri, 15 Mar 2019 09:54:35 -0700</p>
+    <p class="legaleeze center">Version: 1.0 &bull; Last Updated: Fri, 15 Mar 2019 09:58:26 -0700</p>
   </div>
 </footer>
 

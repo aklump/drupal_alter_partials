@@ -31,15 +31,7 @@
 
 ## What Happened?
 
-* In it's simplest form, use a partial file to alter `$build` and you can control the output of things using render arrays programatically.
-
-        
-
-
-
-
-
-
+In it's simplest form, use a partial file to alter `$build` and you can control the output of things using render arrays programatically.
 
 This module allows you to use partial files much the same way that you use tpl files in your theme, to alter build arrays.  All files should be placed in a subfolder of your theme called `alter_partials`.  This is in lieu of placing lots of changes in one big `hook_HOOK_alter()` function, which may get unruly.
 
@@ -49,11 +41,6 @@ By creating one of those files in your theme directory and manipulating the `$bu
 
 For performance reasons, you must include the view mode.
 
-## Installation
-
-1. Install as usual, see [http://drupal.org/node/70151](http://drupal.org/node/70151) for further information.
-2. Enable advanced help for more information and examples.
-
 ## View modes field
 
 An extra field is provided to serve as a UI indicator that the view mode is not being configured via the UI, but instead via code.  It reads _Display managed in code_.  The intention is that for a given display mode, you can show only this field and it will be a clear sign to the content managers why they cannot configure the view mode using normal field means.  For more info see `hook_alter_partials_entities_in_code_alter()`.
@@ -62,17 +49,6 @@ An extra field is provided to serve as a UI indicator that the view mode is not 
 ## Advanced Configuration
 
 1. It is possible for modules to provide alter partials as well.  Refer to `alter_partials.api.php` for more info.
-
-## Usage
-
-| Type | Prefix | Vars |
-|----------|----------|----------|
-| Node | `node--` | &$build, $node |
-| User | `user--` | &$build |
-| Taxonomy Term | `taxonomy-term--` | &$build |
-| Display Suite | `ds--ENTITY TYPE` | &$build, &$vars*, $node |
-
-\* `$vars`: These are the variables from node_preprocess, before node_process.
 
 ## Development
 
