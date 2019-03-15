@@ -2,20 +2,48 @@
 
 **Author:** Aaron Klump  <sourcecode@intheloftstudios.com>
 
-##Summary
+## Quick Start
 
-**Entity alters using partial files not functions.**
+1. Enable this module.
+1. Load any node page in your browser.
+1. In your theme create a folder _alter_partials/_.
+1. In that folder, create _node--default.inc_ with the following snippet.
+
+        <?php
+        
+        $build = [
+          '#markup' => 'Hello world!',
+        ];
+
+1. Now reload the node page.
+1. Because you set `$build` to a render array to print `Hello World!`, that is used in place of the default render array.
+1. To see the default array change the contents of _node--default.inc_ to something like:
+
+        <?php
+        
+        use Drupal\Core\Render\Element;
+        
+        print '<pre>';
+        print_r(array_keys($build));
+        print '</pre>';
+        die;
+
+
+## What Happened?
+
+* In it's simplest form, use a partial file to alter `$build` and you can control the output of things using render arrays programatically.
+
+        
+
+
+
+
+
+
 
 This module allows you to use partial files much the same way that you use tpl files in your theme, to alter build arrays.  All files should be placed in a subfolder of your theme called `alter_partials`.  This is in lieu of placing lots of changes in one big `hook_HOOK_alter()` function, which may get unruly.
 
-Support exists for several entities and Display Suite.
-
-As an example, to alter display suite layout variables before they are rendered, the files suggestions are the following (where we have page node with nid 17 using view mode of narrow_page):
-
-Pattern is: `PREFIX--BUNDLE OR ID--DISPLAY MODE`.
-
-    alter_partials/ds--node--page--narrow-page.inc
-    alter_partials/ds--node--17--narrow-page.inc
+Support exists for several entities.
 
 By creating one of those files in your theme directory and manipulating the `$build` or `$var` variables, you will affect change.
 
@@ -50,7 +78,7 @@ An extra field is provided to serve as a UI indicator that the view mode is not 
 
 * During development you can disable the caching and thereby avoid having to drupal cache clear when adding new partials; you should not do this on production though.  To do so add the following line to your settings.php file:
 
-        $conf['alter_partials.settings']['cache'] = FALSE;
+        $conf['alter_partials.settings']['cache'] = false;
 
 * There is an included module `alter_partials_dev` which should not be enabled in a production environment.
 * The above cache disable is accomplished for you when you enable `alter_partials_dev` module, which also provides a block to help with filenames.  Enable the module and visit the blocks admin page and assign it to a region.  That block will populate with all the possible filenames that could have been used for that page (requires JS).

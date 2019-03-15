@@ -1,21 +1,44 @@
 
 <p><strong>Author:</strong> Aaron Klump  <a href="&topic:alter_partials/&#x6d;&#97;&#105;&#x6c;&#x74;&#111;:&#x73;&#111;&#117;&#x72;&#x63;&#101;c&#x6f;&#100;&#101;&#x40;&#x69;&#110;&#116;&#x68;&#x65;&#108;&#x6f;&#x66;&#116;&#115;&#x74;&#x75;&#100;i&#x6f;&#115;&#46;&#x63;&#x6f;&#109;&">&#x73;&#111;&#117;&#x72;&#x63;&#101;c&#x6f;&#100;&#101;&#x40;&#x69;&#110;&#116;&#x68;&#x65;&#108;&#x6f;&#x66;&#116;&#115;&#x74;&#x75;&#100;i&#x6f;&#115;&#46;&#x63;&#x6f;&#109;</a></p>
 
-<h2>Summary</h2>
+<h2>Quick Start</h2>
 
-<p><strong>Entity alters using partial files not functions.</strong></p>
+<ol>
+<li>Enable this module.</li>
+<li>Load any node page in your browser.</li>
+<li>In your theme create a folder <em>alter_partials/</em>.</li>
+<li><p>In that folder, create <em>node--default.inc</em> with the following snippet.</p>
+
+<pre><code>&lt;?php
+
+$build = [
+  '#markup' =&gt; 'Hello world!',
+];
+</code></pre></li>
+<li><p>Now reload the node page.</p></li>
+<li>Because you set <code>$build</code> to a render array to print <code>Hello World!</code>, that is used in place of the default render array.</li>
+<li><p>To see the default array change the contents of <em>node--default.inc</em> to something like:</p>
+
+<pre><code>&lt;?php
+
+use Drupal\Core\Render\Element;
+
+print '&lt;pre&gt;';
+print_r(array_keys($build));
+print '&lt;/pre&gt;';
+die;
+</code></pre></li>
+</ol>
+
+<h2>What Happened?</h2>
+
+<ul>
+<li>In it's simplest form, use a partial file to alter <code>$build</code> and you can control the output of things using render arrays programatically.</li>
+</ul>
 
 <p>This module allows you to use partial files much the same way that you use tpl files in your theme, to alter build arrays.  All files should be placed in a subfolder of your theme called <code>alter_partials</code>.  This is in lieu of placing lots of changes in one big <code>hook_HOOK_alter()</code> function, which may get unruly.</p>
 
-<p>Support exists for several entities and Display Suite.</p>
-
-<p>As an example, to alter display suite layout variables before they are rendered, the files suggestions are the following (where we have page node with nid 17 using view mode of narrow_page):</p>
-
-<p>Pattern is: <code>PREFIX--BUNDLE OR ID--DISPLAY MODE</code>.</p>
-
-<pre><code>alter_partials/ds--node--page--narrow-page.inc
-alter_partials/ds--node--17--narrow-page.inc
-</code></pre>
+<p>Support exists for several entities.</p>
 
 <p>By creating one of those files in your theme directory and manipulating the <code>$build</code> or <code>$var</code> variables, you will affect change.</p>
 
@@ -80,7 +103,7 @@ alter_partials/ds--node--17--narrow-page.inc
 <ul>
 <li><p>During development you can disable the caching and thereby avoid having to drupal cache clear when adding new partials; you should not do this on production though.  To do so add the following line to your settings.php file:</p>
 
-<pre><code>$conf['alter_partials_cache_enabled'] = FALSE;
+<pre><code>$conf['alter_partials.settings']['cache'] = false;
 </code></pre></li>
 <li><p>There is an included module <code>alter_partials_dev</code> which should not be enabled in a production environment.</p></li>
 <li>The above cache disable is accomplished for you when you enable <code>alter_partials_dev</code> module, which also provides a block to help with filenames.  Enable the module and visit the blocks admin page and assign it to a region.  That block will populate with all the possible filenames that could have been used for that page (requires JS).</li>
