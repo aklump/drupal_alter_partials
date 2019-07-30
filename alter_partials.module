@@ -16,13 +16,13 @@ use Drupal\Core\Render\Element;
  *
  * This can be used for custom page callbacks.
  *
- * @param  array  &$build The build array that will be sent to the partial.
- * @param  array $vars Variables that will sent to the partial as their
+ * @param array  &$build The build array that will be sent to the partial.
+ * @param array $vars Variables that will sent to the partial as their
  *                          key name.
  * @param string $type Usually the implementing module's name
  * @param string $category The second item in the filename construct, optional
  *                          but recommended.  It's one of many of $type.
- * @param  string $version The optional third item in the filename construct.
+ * @param string $version The optional third item in the filename construct.
  *                          Should represent a version of category.
  *
  * @code
@@ -241,5 +241,6 @@ function alter_partials_alter_partials_info() {
       ],
     ];
   }
+
   return [];
 }

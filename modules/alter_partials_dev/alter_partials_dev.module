@@ -7,69 +7,6 @@
  * @{
  */
 
-/**
- * Implements hook_permission().
- */
-function alter_partials_dev_permission() {
-  return array(
-    'alter_partials_dev:access' => array(
-      'title' => t('Access Alter Partials Dev Info'),
-      'description' => t('Access developement info.'),
-      'restrict access' => FALSE,
-    ),
-  );
-}
-
-/**
- * Implements hook_block_info().
- */
-function alter_partials_dev_block_info() {
-  $blocks['suggestions'] = array(
-    'info' => t('Alter Partials suggestions'),
-    'cache' => DRUPAL_NO_CACHE,
-  );
-
-  return $blocks;
-}
-
-/**
- * Implements hook_block_view().
- */
-function alter_partials_dev_block_view($delta = '') {
-  $block = array();
-  switch ($delta) {
-    case 'suggestions':
-      if (\Drupal::currentUser()->hasPermission('alter_partials_dev:access')) {
-        $block['subject'] = t('Alter Partials filename suggestions');
-        // The content will be added via ajax on page load.
-        $block['content'] = array('#markup' => '<div></div>');
-      }
-      break;
-  }
-
-  return $block;
-}
-
-function alter_partials_dev_preprocess_html(&$build) {
-  global $_alter_partials_suggestions;
-  if (\Drupal::currentUser()->hasPermission('alter_partials_dev:access')) {
-    $inject_js['#attached']['js'][] = array(
-      'type' => 'file',
-      'data' => drupal_get_path('module', 'alter_partials_dev') . '/alter_partials_dev.js',
-      'scope' => 'footer',
-    );
-    $inject_js['#attached']['js'][] = array(
-      'type' => 'setting',
-      'data' => array(
-        'alterPartialsDev' => array(
-          'suggestions' => $_alter_partials_suggestions,
-        ),
-      ),
-    );
-    \Drupal::service("renderer")->render($inject_js);
-  }
-}
-
 function alter_partials_dev_stub($path_to_output, array $vars) {
   $filename = str_replace('--', ', ', pathinfo($vars['partial'], PATHINFO_FILENAME));
   $vars = array_keys($vars);
@@ -78,6 +15,7 @@ function alter_partials_dev_stub($path_to_output, array $vars) {
     return !in_array($var, ['partials']);
   }), function ($carry, $var) {
     $type = gettype($var);
+
     return $carry . "\n *   - \$$var $type";
   });
   $stub = <<<EOD
@@ -89,8 +27,9 @@ function alter_partials_dev_stub($path_to_output, array $vars) {
  */
 
 EOD;
-  \Drupal::moduleHandler()->alter('alter_partials_dev_stub', $stub, $path_to_output);
-  $stub .= PHP_EOL. PHP_EOL . PHP_EOL . file_get_contents($path_to_output);
+  \Drupal::moduleHandler()
+    ->alter('alter_partials_dev_stub', $stub, $path_to_output);
+  $stub .= PHP_EOL . PHP_EOL . PHP_EOL . file_get_contents($path_to_output);
   file_put_contents($path_to_output, $stub);
 }
 

@@ -1,4 +1,0 @@
-'alter_partials_dev:access':
-  title: 'Access Alter Partials Dev Info'
-  description: 'Access developement info.'
-  'restrict access': false

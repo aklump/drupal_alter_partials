@@ -1,6 +1,6 @@
 /**
  * @file
- * The main javascript file for alter_partials_dev
+ * The main javascript file for alter_partials_dev.
  *
  * @ingroup alter_partials_dev
  */
@@ -9,29 +9,29 @@
 
   Drupal.behaviors.alterPartialsDev = {};
   Drupal.behaviors.alterPartialsDev.attach = function(context, settings) {
-    var $target = $('#block-alter-partials-dev-suggestions .content');
+    var $target = $('.alter-partials-dev__suggestions');
     if (
       typeof settings.alterPartialsDev.suggestions !== 'undefined' &&
+      settings.alterPartialsDev.suggestions.length &&
       $target.length
     ) {
       var html = [];
       for (var i in settings.alterPartialsDev.suggestions) {
         var items = settings.alterPartialsDev.suggestions[i].list.map(function(
-            item
-          ) {
-            return item + '.inc';
-          }),
-          output = Drupal.theme('itemList', {
-            type: 'ol',
-            items: items,
-          });
+          item
+        ) {
+          return item + '.inc';
+        });
+        var output = Drupal.theme('itemList', {
+          type: 'ol',
+          items: items,
+        });
         html.push(output);
       }
       $target.html(html.join('\n'));
     }
   };
-
-  Drupal.theme.prototype.itemList = function(vars) {
+  Drupal.theme.itemList = function(vars) {
     vars = $.extend(
       {},
       {
