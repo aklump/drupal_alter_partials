@@ -137,7 +137,7 @@ function alter_partials_block_view_alter(array &$build, \Drupal\Core\Block\Block
  */
 function alter_partials_entity_view_alter(array &$build, EntityInterface $entity, EntityViewDisplayInterface $display) {
   $service = \Drupal::service('alter_partials');
-  $build['#entity_type'] = $entity->getEntityType()->id();
+  $build['#entity_type'] = $entity->getEntityTypeId();
   $stack = $service->getStack($build);
   if ($partials = $service->getPartials($stack)) {
     foreach ($partials as $partial) {

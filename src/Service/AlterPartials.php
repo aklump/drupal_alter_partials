@@ -163,7 +163,7 @@ class AlterPartials {
   /**
    * Return a stack of filepaths to check for alters for this build array.
    *
-   * @param  array $build The render array
+   * @param array $build The render array
    *
    * @return array  Files should be tested from the last to the first.
    */
@@ -182,20 +182,20 @@ class AlterPartials {
         $category = $build['#node']->getType();
         break;
 
-      case 'block':
-        $entity = $build['#block'];
-        $category = $build['#plugin_id'];
-        break;
-
       case 'user':
         $entity = $build['#user'];
         break;
 
       default:
-        $entity = $build['#entity'] ?? NULL;
+        if (!($entity = ($build['#entity'] ?? NULL))) {
+          $entity = $build['#' . $build['#entity_type']] ?? NULL;
+        }
+        if ($entity) {
+          $category = $entity->bundle();
+        }
         break;
     }
-
+    $build['#entity'] = $entity ?? NULL;
     if ($entity) {
       $id = $entity->id();
       $view_mode = $build['#view_mode'] ?? 'default';
@@ -237,9 +237,9 @@ class AlterPartials {
   /**
    * Generates a file stack for inclusions.
    *
-   * @param  string $base E.g. entity type, ds, etc.
-   * @param  string $type E.g. bundle name
-   * @param  mixed $id E.g. entity id
+   * @param string $base E.g. entity type, ds, etc.
+   * @param string $type E.g. bundle name
+   * @param mixed $id E.g. entity id
    *
    * @return array
    */
@@ -301,9 +301,9 @@ class AlterPartials {
   /**
    * Inserts node-based vars for the alter partial.
    *
-   * @param  array &$vars
+   * @param array &$vars
    *   The variables array.
-   * @param  object $node
+   * @param object $node
    */
   public function addNodeVars(array &$vars, $node) {
     $vars = [
@@ -316,9 +316,9 @@ class AlterPartials {
   /**
    * Inserts view-based vars for the alter partial.
    *
-   * @param  array &$vars
+   * @param array &$vars
    *   The variables array.
-   * @param  object $view
+   * @param object $view
    */
   public function addViewVars(array &$vars, $view) {
     $vars = [
@@ -347,9 +347,9 @@ class AlterPartials {
   /**
    * Inserts global vars for the alter partials.
    *
-   * @param  array &$vars
+   * @param array &$vars
    *   The variables array.
-   * @param  array $build
+   * @param array $build
    *   The original build array.
    */
   public function addGlobalVars(array &$vars, array $build) {
@@ -367,17 +367,9 @@ class AlterPartials {
       $global_vars['entity_type_id'] = $build['#entity_type'];
       $global_vars[$build['#entity_type']] = $build['#entity'];
       $global_vars['entity'] = $build['#entity'];
+      $global_vars['entity_id'] = $build['#entity']->id();
 
-      // Get the entity id.
-      if (method_exists($build['#entity'], 'identifier')) {
-        $global_vars['entity_id'] = $build['#entity']->identifier();
-      }
-      else {
-        $info = $this->entityTypeManager->getDefinition($build['#entity_type']);
-        $key = isset($info['entity keys']['name']) ? $info['entity keys']['name'] : $info['entity keys']['id'];
-        $global_vars['entity_id'] = isset($build['#entity']->$key) ? $build['#entity']->$key : NULL;
-      }
-
+      // TODO Deprecate this dependency.
       if ($this->moduleHandler->moduleExists('data_api')) {
         $global_vars['e'] = data_api($build['#entity_type']);
       }
