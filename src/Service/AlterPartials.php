@@ -172,6 +172,7 @@ class AlterPartials {
     $type = $build['#entity_type'] ?? NULL;
     $key = NULL;
     $category = NULL;
+    $entity = NULL;
     switch ($type) {
       case 'taxonomy_term':
         $entity = $build['name']['#object'];
@@ -187,7 +188,7 @@ class AlterPartials {
         break;
 
       default:
-        if (!($entity = ($build['#entity'] ?? NULL))) {
+        if (isset($build['#entity_type']) && !($entity = ($build['#entity'] ?? NULL))) {
           $entity = $build['#' . $build['#entity_type']] ?? NULL;
         }
         if ($entity) {
