@@ -9,7 +9,6 @@
 
 use Drupal\Core\Entity\Display\EntityViewDisplayInterface;
 use Drupal\Core\Entity\EntityInterface;
-use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Render\Element;
 
 /**
@@ -244,35 +243,4 @@ function alter_partials_alter_partials_info() {
   }
 
   return [];
-}
-
-function alter_partials_webform_submission_form_alter(&$form, FormStateInterface $form_state, $form_id) {
-  $form['#after_build'][] = '_alter_partials_webform_submission_form_after_build';
-}
-
-function _alter_partials_webform_submission_form_after_build(array $form, FormStateInterface $form_state) {
-  $service = \Drupal::service('alter_partials');
-  $build['#entity'] = \Drupal\webform\Entity\Webform::load($form['#webform_id']);
-  $build['#entity_type'] = $build['#entity']->getEntityTypeId();
-  $stack = $service->getStack($build);
-
-  // Just pass the form through if no alters are found.
-  if (!($partials = $service->getPartials($stack))) {
-    return $form;
-  }
-
-  // Otherwise we will create a new build array, moving the form as the child.
-  $build['#form_state'] = $form_state;
-  $build['webform'] = $form;
-  foreach ($partials as $partial) {
-    // Prepare vars for use by the file.
-    $extract_vars = [];
-    $service->addGlobalVars($extract_vars, $build);
-    extract($extract_vars);
-    unset($extract_vars);
-    include $partial;
-  }
-
-
-  return $build;
 }
