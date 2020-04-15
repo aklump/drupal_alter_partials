@@ -139,7 +139,7 @@ function alter_partials_entity_view_alter(array &$build, EntityInterface $entity
   $service = \Drupal::service('alter_partials');
   $build['#entity_type'] = $entity->getEntityTypeId();
   $stack = $service->getStack($build);
-  if ($partials = $service->getPartials($stack)) {
+  if (($partials = $service->getPartials($stack))) {
     foreach ($partials as $partial) {
       // Prepare vars for use by the file.
       $extract_vars = [];

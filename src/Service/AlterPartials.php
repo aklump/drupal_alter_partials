@@ -175,16 +175,22 @@ class AlterPartials {
     $entity = NULL;
     switch ($type) {
       case 'taxonomy_term':
-        $entity = $build['name']['#object'];
+        if (!($entity = $build['name']['#object'])) {
+          throw new \InvalidArgumentException(sprintf("If #entity_type === 'taxonomy_term' then name.#object must be set. %s", json_encode($build)));
+        }
         break;
 
       case 'node':
-        $entity = $build['#node'];
-        $category = $build['#node']->getType();
+        if (!($entity = $build['#node'])) {
+          throw new \InvalidArgumentException(sprintf("If #entity_type === 'node' then #node must be set. %s", json_encode($build)));
+        }
+        $category = $entity ? $entity->getType() : '';
         break;
 
       case 'user':
-        $entity = $build['#user'];
+        if (!($entity = $build['#user'])) {
+          throw new \InvalidArgumentException(sprintf("If #entity_type === 'user' then #user must be set. %s", json_encode($build)));
+        }
         break;
 
       default:
