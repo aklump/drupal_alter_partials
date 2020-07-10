@@ -7,6 +7,7 @@ use Drupal\Core\Cache\CacheBackendInterface;
 use Drupal\Core\Config\ConfigFactoryInterface;
 use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\Core\Extension\ModuleHandlerInterface;
+use Drupal\Core\File\FileSystemInterface;
 use Drupal\Core\Language\LanguageManagerInterface;
 use Drupal\Core\Render\Element;
 use Drupal\Core\Url;
@@ -26,18 +27,22 @@ class AlterPartials {
 
   protected $cache;
 
+  protected $fileSystem;
+
   public function __construct(
     ConfigFactoryInterface $config_factory,
     LanguageManagerInterface $language_manager,
     EntityTypeManagerInterface $entity_type_manager,
     ModuleHandlerInterface $module_handler,
-    CacheBackendInterface $cache_backend
+    CacheBackendInterface $cache_backend,
+    FileSystemInterface $file_system
   ) {
     $this->configFactory = $config_factory;
     $this->languageManager = $language_manager;
     $this->entityTypeManager = $entity_type_manager;
     $this->moduleHandler = $module_handler;
     $this->cache = $cache_backend;
+    $this->fileSystem = $file_system;
   }
 
   public function getPartials(array $stack) {
@@ -105,7 +110,7 @@ class AlterPartials {
             throw new \InvalidArgumentException("module must be an array in implementation of hook_alter_partials_info");
           }
           foreach ($dirs['module'] as $path) {
-            $list = file_scan_directory($path, '/.*\.inc$/', ['recurse' => FALSE]);
+            $list = $this->fileSystem->scanDirectory($path, '/.*\.inc$/', ['recurse' => FALSE]);
             $found = array_merge($found, array_keys($list));
           }
         }
@@ -114,7 +119,7 @@ class AlterPartials {
             throw new \InvalidArgumentException("theme must be an array in implementation of hook_alter_partials_info");
           }
           foreach ($dirs['theme'] as $path) {
-            $list = file_scan_directory($path, '/.*\.inc$/', ['recurse' => FALSE]);
+            $list = $this->fileSystem->scanDirectory($path, '/.*\.inc$/', ['recurse' => FALSE]);
             $found = array_merge($found, array_keys($list));
           }
         }
