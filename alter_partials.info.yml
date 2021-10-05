@@ -3,6 +3,6 @@ description: 'Provides file-based (partials) for hook_alters.'
 package: Other
 core_version_requirement: '^8 || ^9'
 php: !!float 7
-version: 8.x-1.1
+version: 8.x-1.2-rc1
 type: module
 dependencies: {  }
