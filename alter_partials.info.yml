@@ -1,7 +1,7 @@
 name: 'Alter Partials'
 description: 'Provides file-based (partials) for hook_alters.'
 package: Other
-core_version_requirement: '^8 || ^9'
+core_version_requirement: ^8 || ^9
 php: !!float 7
 version: 8.x-1.2.0
 type: module

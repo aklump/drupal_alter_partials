@@ -1,7 +1,7 @@
 name: 'Alter Partials Dev'
 description: 'Development helper to Alter Partials; disable in production environments.'
 package: Other
-core: 8.x
+core_version_requirement: ^8 || ^9
 author: aklump
 dependencies:
   alter_partials: 'drupal:alter_partials'
