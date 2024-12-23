@@ -1,0 +1,12 @@
+title: 'Alter Partials Drupal Module'
+uuid: 01718bbf-0149-489b-bf0d-9f49411db9ca
+chapters:
+  -
+    id: general
+    title: General
+    pages:
+      - readme
+      - modules
+      - themes
+      - roadmap
+      - changelog

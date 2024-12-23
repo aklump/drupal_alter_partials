@@ -1,4 +1,6 @@
 {
+    "name": "aklump_drupal/alter_partials",
+    "type": "drupal-custom-module",
     "autoload-dev": {
         "psr-4": {
             "Drupal\\alter_partials\\": "src/"

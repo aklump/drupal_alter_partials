@@ -1,0 +1,224 @@
+<!doctype html>
+<html lang="en" data-knowledge-id="01718bbf-0149-489b-bf0d-9f49411db9ca">
+<head>
+  <!-- Required meta tags -->
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+      <link rel="stylesheet" href="../../dist/node_modules/bootstrap/dist/css/bootstrap.css?ver=1.2.2">
+      <link rel="stylesheet" href="../../dist/dist/bootstrap_theme.css?ver=1.2.2">
+      <link rel="stylesheet" href="../../dist/node_modules/bootstrap-icons/font/bootstrap-icons.min.css?ver=1.2.2">
+    <title>Quick Start | Alter Partials Drupal Module</title>
+</head>
+<body class="my-5">
+
+<header class="header bg-light fixed-top p-2 pt-1">
+  <div class="container-md">
+    <div class="d-flex justify-content-between align-items-center">
+      <div class="header__breadcrumbs flex-shrink-0 flex-grow-1 me-3">
+        <nav aria-label="breadcrumb">
+  <ol class="breadcrumb mb-0">
+        <li class="breadcrumb-item">
+      <a class="fw-bold" href="../../index.html">Alter Partials Drupal Module</a>
+    </li>
+    <li class="breadcrumb-item">
+      <a class="fw-bold" href="#" data-bs-toggle="offcanvas"
+         data-bs-target="#table-of-contents"
+         aria-controls="table-of-contents">TOC</a>
+    </li>
+    <li class="breadcrumb-item">
+      <a href="readme.html">General</a></li>
+  </ol>
+</nav>
+
+      </div>
+      <div class="header__tags me-3">  </div>
+      <div class="header__page-numbers flex-shrink-1">3
+        / 5</div>
+    </div>
+  </div>
+</header>
+
+<main class="container-md flex-column">
+  <div class="row mb-5 pt-5">
+    <article class="col">
+      <h1 class="mb-4 text-primary">Quick Start</h1>
+      <ol>
+<li>Create the folder _alter<em>partials</em> in your theme.</li>
+<li>Enable _alter_partials<em>dev</em> and assign the block <em>Alter Partials suggestions</em> to a visible region in your active theme.</li>
+<li>By enabling _alter_partials<em>dev</em> the caching of partials is disabled, you have access to a suggestion list of filenames as a block, and a partial stub writer is available, so this is very helpful during development.</li>
+<li><strong>_alter_partials<em>dev</em> MUST NOT BE ENABLED ON A PRODUCTION SITE.</strong></li>
+<li>Visit the page you want to alter and find the filename suggestion that applies.</li>
+<li>Create that file inside _alter<em>partials</em>.</li>
+<li><p>Set the contents of the file to the following, and make sure the file is writeable by PHP.</p>
+<pre><code> &lt;?php
+ alter_partials_dev_stub(__FILE__, get_defined_vars());
+    
+</code></pre>
+</li>
+<li><p>Visit the page and the file will be rewritten with a stub; reload the file to see the new contents.</p>
+</li>
+<li>The render array is called <code>$build</code>, which controls the output. </li>
+<li>You now have an alter partial file; modify <code>$build</code> as desired.</li>
+</ol>
+    </article>
+  </div>
+</main>
+
+  <footer class="footer d-flex justify-content-center">
+    <div class="flex-column justify-content-center">
+              Version:
+        <strong>1.2.2</strong>
+        &bull;
+                    Last Update: <strong>12/23/2024</strong>
+          </div>
+  </footer>
+
+
+<nav class="nav d-flex justify-content-center align-items-center
+  fixed-bottom">
+  <div class="btn-group flex-fill">
+              <a href="readme.html" class="btn nav__prev-chapter btn-secondary"><i class="bi
+      bi-caret-left-fill"></i> Drupal Module: Alter Partials</a>
+  
+    
+              <a href="modules.html" class="btn nav__prev-page js-nav__prev-page
+    btn-primary"><i class="bi
+      bi-caret-left-fill"></i></a>
+  
+    
+    <a class="nav__toc btn btn-light" href="#"
+       data-bs-toggle="offcanvas"
+       data-bs-target="#table-of-contents"
+       aria-controls="table-of-contents"><i class="bi
+           bi-list-ol"></i></a>
+    
+              <a href="roadmap.html" class="btn nav__next-page js-nav__next-page
+    btn-primary"><i class="bi bi-file-earmark"></i> Roadmap <i class="bi
+       bi-caret-right-fill"></i></a>
+  
+    
+              <span class="btn nav__next-chapter btn-secondary "></span>
+  
+  </div>
+</nav>
+
+
+<div class="offcanvas offcanvas-start" tabindex="-1" id="table-of-contents"
+     aria-labelledby="table-of-contents__title" data-bs-keyboard="true">
+  <div class="offcanvas-header">
+    <h1 class="h6 offcanvas-title js-chapter-list-title"
+        id="table-of-contents__title">All
+      Chapters
+      &amp; Pages</h1>
+    <h1 class="d-none h6 offcanvas-title js-search-results-title"
+        id="table-of-contents__title">Search Results</h1>
+    <button type="button" class="btn-close text-reset" data-bs-dismiss="offcanvas" aria-label="Close"></button>
+  </div>
+  <div class="offcanvas-body">
+          <input class="js-search form-control mb-4" type="search"
+             placeholder="Search docs..."
+             aria-label="Search">
+      <div class="js-search-results d-none">
+        <h2 class="h4 mt-4">Matched Pages</h2>
+        <ol class="list-unstyled">
+                                              <li data-page="readme" value="1">
+      <a class="js-page-link" href="readme.html">Drupal Module: Alter Partials<span
+              class="js-search-score
+              badge
+              bg-info rounded-pill badge-sm"></span></a>
+    </li>
+  
+                                    <li data-page="modules" value="2">
+      <a class="js-page-link" href="modules.html">Provide Partials by Module<span
+              class="js-search-score
+              badge
+              bg-info rounded-pill badge-sm"></span></a>
+    </li>
+  
+                                    <li data-page="themes" value="3">
+      <a class="js-page-link" href="themes.html">Quick Start<span
+              class="js-search-score
+              badge
+              bg-info rounded-pill badge-sm"></span></a>
+    </li>
+  
+                                    <li data-page="roadmap" value="4">
+      <a class="js-page-link" href="roadmap.html">Roadmap<span
+              class="js-search-score
+              badge
+              bg-info rounded-pill badge-sm"></span></a>
+    </li>
+  
+                                    <li data-page="changelog" value="5">
+      <a class="js-page-link" href="changelog.html">Changelog<span
+              class="js-search-score
+              badge
+              bg-info rounded-pill badge-sm"></span></a>
+    </li>
+  
+                              </ol>
+      </div>
+        
+    <div class="js-chapter-list">
+              <h2 class="h4 mt-4">General</h2>
+        <ol>
+                                <li data-page="readme" value="1">
+      <a class="js-page-link" href="readme.html">Drupal Module: Alter Partials</a>
+    </li>
+  
+                                <li data-page="modules" value="2">
+      <a class="js-page-link" href="modules.html">Provide Partials by Module</a>
+    </li>
+  
+                                <li data-page="themes" value="3">
+      <a class="js-page-link" href="themes.html">Quick Start</a>
+    </li>
+  
+                                <li data-page="roadmap" value="4">
+      <a class="js-page-link" href="roadmap.html">Roadmap</a>
+    </li>
+  
+                                <li data-page="changelog" value="5">
+      <a class="js-page-link" href="changelog.html">Changelog</a>
+    </li>
+  
+                  </ol>
+          </div>
+  </div>
+</div>
+<div class="modal fade" id="modal" tabindex="-1"
+     aria-labelledby="modal-title" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="js-modal-title modal-title" id="modal-title"></h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <p class="mt-1 mb-4">
+                  </p>
+        
+                
+        <ul class="list-group list-group-flush">
+                                    <a class="list-group-item list-group-item-action"
+                 data-tags="[]" href="readme.html">Drupal Module: Alter Partials</a>
+                                                <a class="list-group-item list-group-item-action"
+                 data-tags="[]" href="modules.html">Provide Partials by Module</a>
+                                                <a class="list-group-item list-group-item-action"
+                 data-tags="[]" href="themes.html">Quick Start</a>
+                                                <a class="list-group-item list-group-item-action"
+                 data-tags="[]" href="roadmap.html">Roadmap</a>
+                                                <a class="list-group-item list-group-item-action"
+                 data-tags="[]" href="changelog.html">Changelog</a>
+                              </ul>
+      </div>
+    </div>
+  </div>
+</div>
+
+  <script src="../../dist/node_modules/bootstrap/dist/js/bootstrap.min.js?ver=1.2.2"></script>
+  <script src="../../dist/lunr.js?ver=1.2.2"></script>
+  <script src="../../dist/knowledge.min.js?ver=1.2.2"></script>
+
+</body>
+</html>
