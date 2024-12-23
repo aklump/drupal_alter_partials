@@ -23,20 +23,3 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
 
 - From Loft Docs to Knowledge
-
-### Deprecated
-
-- lorem
-
-### Removed
-
-- lorem
-
-### Fixed
-
-- lorem
-
-### Security
-
-- lorem
-
