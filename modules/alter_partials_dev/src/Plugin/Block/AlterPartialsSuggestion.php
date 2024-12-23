@@ -18,7 +18,8 @@ class AlterPartialsSuggestion extends BlockBase {
    */
   public function build() {
     global $_alter_partials_suggestions;
-    $build = [
+
+    return [
       '#markup' => '<div class="alter-partials-dev__suggestions"></div>',
       '#attached' => [
         'library' => ['alter_partials_dev/alter_partials_dev'],
@@ -28,8 +29,6 @@ class AlterPartialsSuggestion extends BlockBase {
       ],
       '#cache' => ['contexts' => ['route.name']],
     ];
-
-    return $build;
   }
 
 }

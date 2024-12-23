@@ -40,7 +40,7 @@ function alter_partials_custom(&$build, $vars, $type, $category = '', $version =
   $build['#alter_partials_category'] = $category;
   $build['#alter_partials_version'] = $version;
   $build['#alter_partials_vars'] = $vars;
-  $service = \Drupal::service('alter_partials');
+  $service = Drupal::service('alter_partials');
   $stack = $service->getStack($build);
 
   if ($partials = $service->getPartials($stack)) {
@@ -70,7 +70,7 @@ function alter_partials_preprocess_views_view(&$vars) {
     0 => ['#markup' => $vars['rows']],
   ];
   $build = $original;
-  $service = \Drupal::service('alter_partials');
+  $service = Drupal::service('alter_partials');
   $stack = $service->getStack($build);
   if ($partials = $service->getPartials($stack)) {
     foreach ($partials as $partial) {
@@ -92,7 +92,7 @@ function alter_partials_preprocess_views_view(&$vars) {
  */
 function alter_partials_page_alter(&$build) {
   $stack = [];
-  $service = \Drupal::service('alter_partials');
+  $service = Drupal::service('alter_partials');
   if (empty($build['content']['system_main']['nodes'])) {
     $stack = $service->getPathStack();
   }
@@ -114,7 +114,7 @@ function alter_partials_page_alter(&$build) {
 }
 
 function alter_partials_block_view_alter(array &$build, \Drupal\Core\Block\BlockPluginInterface $block) {
-  $service = \Drupal::service('alter_partials');
+  $service = Drupal::service('alter_partials');
   $build['#entity_type'] = 'block';
   $stack = $service->getStack($build);
   if ($partials = $service->getPartials($stack)) {
@@ -136,7 +136,7 @@ function alter_partials_block_view_alter(array &$build, \Drupal\Core\Block\Block
  * Implements hook_entity_view_alter().
  */
 function alter_partials_entity_view_alter(array &$build, EntityInterface $entity, EntityViewDisplayInterface $display) {
-  $service = \Drupal::service('alter_partials');
+  $service = Drupal::service('alter_partials');
   $build['#entity_type'] = $entity->getEntityTypeId();
   $stack = $service->getStack($build);
   if (($partials = $service->getPartials($stack))) {
@@ -162,7 +162,7 @@ function alter_partials_entity_view_alter(array &$build, EntityInterface $entity
  * the UI.
  */
 function alter_partials_entity_extra_field_info() {
-  $service = \Drupal::service('alter_partials');
+  $service = Drupal::service('alter_partials');
   $all_partials = array_map(function ($name) use ($service) {
     return $service->getEntityTypeAndBundleByPartialFilename($name);
   }, $service->getAllAvailablePartials());
@@ -171,8 +171,8 @@ function alter_partials_entity_extra_field_info() {
   }, $all_partials);
 
 
-  $bundle_info_service = \Drupal::service('entity_type.bundle.info');
-  $entity_info = \Drupal::entityTypeManager()->getDefinitions();
+  $bundle_info_service = Drupal::service('entity_type.bundle.info');
+  $entity_info = Drupal::entityTypeManager()->getDefinitions();
   $available = [];
   foreach ($entity_info as $entity_type => $info) {
     foreach ($bundle_info_service->getBundleInfo($entity_type) as $bundle => $bundle_info) {
@@ -206,7 +206,7 @@ function alter_partials_entity_extra_field_info() {
     }
   };
 
-  \Drupal::moduleHandler()->alter('alter_partials_entities_in_code', $entities);
+  Drupal::moduleHandler()->alter('alter_partials_entities_in_code', $entities);
 
   $extra = [];
   foreach (Element::children($entities) as $entity_type) {
@@ -230,9 +230,13 @@ function alter_partials_entity_extra_field_info() {
  * on the existence of the directory.
  */
 function alter_partials_alter_partials_info() {
-  $config = \Drupal::service('config.factory')->get('system.theme');
-  if (($theme_folder = \Drupal::root() . '/' . drupal_get_path('theme', $config->get('default')) . '/alter_partials')
-    && is_dir($theme_folder)) {
+  $default_theme = Drupal::service('config.factory')
+    ->get('system.theme')
+    ->get('default');
+  $theme_folder = Drupal::service('extension.list.theme')
+    ->getPath($default_theme);
+  $theme_folder .= '/alter_partials';
+  if ($theme_folder && is_dir($theme_folder)) {
     return [
       'directory' => [
         'theme' => [
